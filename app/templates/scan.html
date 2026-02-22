@@ -17,8 +17,6 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script>
     const onScanSuccess = (decodedText) => {
-      // Your QR likely contains the token itself OR a verify URL.
-      // If it’s a full URL, just go there. If it’s a token, build verify URL.
       if (decodedText.startsWith("http")) {
         window.location.href = decodedText;
       } else {
@@ -28,7 +26,6 @@
     };
 
     const onScanFailure = (error) => {
-      // ignore scan errors (happens continuously while scanning)
     };
 
     const html5QrcodeScanner = new Html5QrcodeScanner(
