@@ -1,0 +1,210 @@
+import os
+from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
+from datetime import datetime, timezone, timedelta
+from app import db
+from app.models import Charity, Campaign, IssuedQR, Collector
+from app.services.token_service import sign_payload, token_hash
+from app.services.qr_service import make_qr_png
+from werkzeug.utils import secure_filename
+
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+
+def allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+admin_bp = Blueprint("admin", __name__)
+
+@admin_bp.get("/")
+def dashboard():
+    charities = Charity.query.order_by(Charity.name.asc()).all()
+    campaigns = Campaign.query.order_by(Campaign.created_at.desc()).all()
+    return render_template("admin/dashboard.html", charities=charities, campaigns=campaigns)
+
+# -------- For Charities --------
+
+@admin_bp.get("/charities/new")
+def new_charity():
+    return render_template("admin/create_charity.html")
+
+@admin_bp.post("/charities/new")
+def create_charity():
+    name = request.form.get("name", "").strip()
+    reg = request.form.get("registration_number", "").strip()
+    website = request.form.get("website", "").strip() or None
+
+    if not name or not reg:
+        flash("Name and registration number are required.", "error")
+        return redirect(url_for("admin.new_charity"))
+
+    # Prevent duplicate registration numbers
+    existing = Charity.query.filter_by(registration_number=reg).first()
+    if existing:
+        flash("A charity with that registration number already exists.", "error")
+        return redirect(url_for("admin.new_charity"))
+
+    charity = Charity(name=name, registration_number=reg, website=website)
+    db.session.add(charity)
+    db.session.commit()
+
+    flash("Charity created successfully.", "success")
+    return redirect(url_for("admin.dashboard"))
+
+# -------- For Campaigns --------
+
+@admin_bp.get("/campaigns/new")
+def new_campaign():
+    charities = Charity.query.order_by(Charity.name.asc()).all()
+    return render_template("admin/create_campaign.html", charities=charities)
+
+@admin_bp.post("/campaigns/new")
+def create_campaign():
+    charity_id = request.form.get("charity_id", "").strip()
+    title = request.form.get("title", "").strip()
+    description = request.form.get("description", "").strip() or None
+    starts_at = request.form.get("starts_at", "").strip()
+    ends_at = request.form.get("ends_at", "").strip()
+
+    if not charity_id or not title or not starts_at or not ends_at:
+        flash("Charity, title, start date, and end date are required.", "error")
+        return redirect(url_for("admin.new_campaign"))
+
+    try:
+        start_dt = datetime.fromisoformat(starts_at)
+        end_dt = datetime.fromisoformat(ends_at)
+    except ValueError:
+        flash("Invalid date format. Please use the date picker.", "error")
+        return redirect(url_for("admin.new_campaign"))
+
+    if end_dt <= start_dt:
+        flash("End date must be after start date.", "error")
+        return redirect(url_for("admin.new_campaign"))
+
+    charity = Charity.query.get(int(charity_id))
+    if not charity:
+        flash("Selected charity not found.", "error")
+        return redirect(url_for("admin.new_campaign"))
+
+    campaign = Campaign(
+        charity_id=charity.id,
+        title=title,
+        description=description,
+        starts_at=start_dt,
+        ends_at=end_dt,
+        status="active",
+    )
+    db.session.add(campaign)
+    db.session.commit()
+
+    flash("Campaign created successfully.", "success")
+    return redirect(url_for("admin.dashboard"))
+
+@admin_bp.post("/campaigns/<int:campaign_id>/issue-qr")
+def issue_qr(campaign_id: int):
+    campaign = Campaign.query.get_or_404(campaign_id)
+
+    collector_id = request.form.get("collector_id")
+    if not collector_id:
+        flash("Please select a collector.", "error")
+        return redirect(url_for("admin.issue_qr_page", campaign_id=campaign_id))
+
+    collector = Collector.query.get(int(collector_id))
+    if not collector or collector.campaign_id != campaign_id:
+        flash("Invalid collector selected.", "error")
+        return redirect(url_for("admin.issue_qr_page", campaign_id=campaign_id))
+
+    exp = int((datetime.now(tz=timezone.utc) + timedelta(days=7)).timestamp())
+
+    payload = {
+        "cid": campaign.id,
+        "collector_id": collector.id,
+        "exp": exp,
+        "n": f"camp-{campaign.id}-col-{collector.id}-{int(datetime.now(tz=timezone.utc).timestamp())}"
+    }
+
+    token = sign_payload(payload)
+
+    record = IssuedQR(
+        campaign_id=campaign.id,
+        collector_id=collector.id,
+        token=token,
+        token_hash=token_hash(token),
+        expires_at=datetime.fromtimestamp(exp, tz=timezone.utc),
+        revoked_at=None,
+    )
+    db.session.add(record)
+    db.session.commit()
+
+    flash("QR issued successfully.", "success")
+    return redirect(url_for("admin.show_qr", issued_id=record.id))
+
+@admin_bp.get("/issued/<int:issued_id>")
+def show_qr(issued_id: int):
+    issued = IssuedQR.query.get_or_404(issued_id)
+    campaign = Campaign.query.get_or_404(issued.campaign_id)
+    charity = Charity.query.get_or_404(campaign.charity_id)
+
+    return render_template("admin/issued_qr.html", issued=issued, campaign=campaign, charity=charity)
+
+import os
+
+@admin_bp.get("/issued/<int:issued_id>/qr.png")
+def issued_qr_png(issued_id: int):
+    issued = IssuedQR.query.get_or_404(issued_id)
+
+    base = os.getenv("PUBLIC_BASE_URL", "http://172.20.10.2:5050")
+    verify_url = f"{base}/verify?token={issued.token}"
+
+    png_bytes = make_qr_png(verify_url)
+    return Response(png_bytes, mimetype="image/png")
+
+@admin_bp.get("/campaigns/<int:campaign_id>/collectors/new")
+def new_collector(campaign_id: int):
+    campaign = Campaign.query.get_or_404(campaign_id)
+    charity = Charity.query.get_or_404(campaign.charity_id)
+    return render_template("admin/create_collector.html", campaign=campaign, charity=charity)
+
+@admin_bp.post("/campaigns/<int:campaign_id>/collectors/new")
+def create_collector(campaign_id: int):
+    campaign = Campaign.query.get_or_404(campaign_id)
+
+    full_name = request.form.get("full_name", "").strip()
+    badge_number = request.form.get("badge_number", "").strip()
+
+    if not full_name or not badge_number:
+        flash("Full name and badge number are required.", "error")
+        return redirect(url_for("admin.new_collector", campaign_id=campaign_id))
+
+    photo = request.files.get("photo")
+    photo_filename = None
+
+    if photo and photo.filename:
+        if not allowed_file(photo.filename):
+            flash("Photo must be PNG/JPG/JPEG/WEBP.", "error")
+            return redirect(url_for("admin.new_collector", campaign_id=campaign_id))
+
+        uploads_dir = os.path.join("app", "static", "uploads")
+        os.makedirs(uploads_dir, exist_ok=True)
+
+        safe = secure_filename(photo.filename)
+        photo_filename = f"campaign{campaign_id}_{int(datetime.utcnow().timestamp())}_{safe}"
+        photo.save(os.path.join(uploads_dir, photo_filename))
+
+    collector = Collector(
+        campaign_id=campaign_id,
+        full_name=full_name,
+        badge_number=badge_number,
+        photo_filename=photo_filename,
+    )
+    db.session.add(collector)
+    db.session.commit()
+
+    flash("Collector added successfully.", "success")
+    return redirect(url_for("admin.dashboard"))
+
+@admin_bp.get("/campaigns/<int:campaign_id>/issue-qr")
+def issue_qr_page(campaign_id: int):
+    campaign = Campaign.query.get_or_404(campaign_id)
+    collectors = Collector.query.filter_by(campaign_id=campaign_id).all()
+    charity = Charity.query.get_or_404(campaign.charity_id)
+    return render_template("admin/issue_qr_select.html", campaign=campaign, charity=charity, collectors=collectors)

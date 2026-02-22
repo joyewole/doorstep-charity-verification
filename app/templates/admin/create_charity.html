@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card">
+    <h2>Add Charity</h2>
+
+    <form method="POST" action="/admin/charities/new">
+      <label><strong>Name</strong></label><br/>
+      <input name="name" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;" required>
+      <br/><br/>
+
+      <label><strong>Registration Number</strong></label><br/>
+      <input name="registration_number" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;" required>
+      <br/><br/>
+
+      <label><strong>Website (optional)</strong></label><br/>
+      <input name="website" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;">
+      <br/><br/>
+
+      <button type="submit" class="btn" style="border:none; cursor:pointer;">Save Charity</button>
+      <a href="/admin/" class="btn" style="background:#475569; margin-left:8px;">Back</a>
+    </form>
+  </div>
+{% endblock %}

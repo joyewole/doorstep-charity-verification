@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card">
+    <h2>Issue QR</h2>
+    <p class="muted"><strong>Campaign:</strong> {{ campaign.title }} ({{ charity.name }})</p>
+
+    {% if not collectors %}
+      <p class="muted">You must add at least one collector for this campaign before issuing a QR.</p>
+      <a class="btn" href="{{ url_for('admin.new_collector', campaign_id=campaign.id) }}">Add Collector</a>
+      <a class="btn secondary" href="{{ url_for('admin.dashboard') }}" style="margin-left:8px;">Back</a>
+    {% else %}
+      <form method="POST" action="{{ url_for('admin.issue_qr', campaign_id=campaign.id) }}">
+        <label>Select collector</label><br/>
+        <select name="collector_id" required>
+          {% for c in collectors %}
+            <option value="{{ c.id }}">{{ c.full_name }} (Badge: {{ c.badge_number }})</option>
+          {% endfor %}
+        </select>
+        <br/><br/>
+
+        <button class="btn" type="submit">Issue QR</button>
+        <a class="btn secondary" href="{{ url_for('admin.dashboard') }}" style="margin-left:8px;">Back</a>
+      </form>
+    {% endif %}
+  </div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card">
+    <h2>Scan QR</h2>
+    <p class="muted">Use your phone camera to scan a QR code and verify the campaign.</p>
+
+    <div id="reader" style="width:100%; max-width:420px;"></div>
+    <p class="muted" style="margin-top:10px;">
+      If prompted, allow camera access.
+    </p>
+
+    <div class="actions">
+      <a class="btn outline" href="{{ url_for('public.home') }}">Back</a>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script>
+    const onScanSuccess = (decodedText) => {
+      // Your QR likely contains the token itself OR a verify URL.
+      // If it’s a full URL, just go there. If it’s a token, build verify URL.
+      if (decodedText.startsWith("http")) {
+        window.location.href = decodedText;
+      } else {
+        const url = "{{ url_for('public.verify_page') }}" + "?token=" + encodeURIComponent(decodedText);
+        window.location.href = url;
+      }
+    };
+
+    const onScanFailure = (error) => {
+      // ignore scan errors (happens continuously while scanning)
+    };
+
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader",
+      { fps: 10, qrbox: 250 },
+      false
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+  </script>
+{% endblock %}

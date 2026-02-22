@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card">
+    <h2>Add Collector</h2>
+    <p class="muted"><strong>Campaign:</strong> {{ campaign.title }} ({{ charity.name }})</p>
+
+    <form method="POST" enctype="multipart/form-data">
+      <label>Full name</label><br/>
+      <input name="full_name" required><br/><br/>
+
+      <label>Badge number</label><br/>
+      <input name="badge_number" required><br/><br/>
+
+      <label>Photo (optional)</label><br/>
+      <input type="file" name="photo" accept="image/*"><br/><br/>
+
+      <button class="btn" type="submit">Save Collector</button>
+      <a class="btn secondary" href="{{ url_for('admin.dashboard') }}" style="margin-left:8px;">Back</a>
+    </form>
+  </div>
+{% endblock %}

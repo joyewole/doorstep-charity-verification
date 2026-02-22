@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card">
+    <h2>Admin Dashboard</h2>
+    <p class="muted">Create charities and campaigns, then issue QR codes.</p>
+
+    <div style="margin-top: 12px;">
+      <a class="btn" href="{{ url_for('admin.new_charity') }}">Add Charity</a>
+      <a class="btn" href="{{ url_for('admin.new_campaign') }}" style="margin-left: 8px;">Add Campaign</a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Charities</h3>
+
+      {% if charities %}
+        <ul>
+          {% for c in charities %}
+            <li>
+              <strong>{{ c.name }}</strong>
+              {% if c.registration_number %}
+                — Reg: {{ c.registration_number }}
+              {% endif %}
+              {% if c.website %}
+                — <span class="muted">{{ c.website }}</span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">No charities yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+  <h3>Campaigns</h3>
+
+  {% if campaigns %}
+    <ul class="clean">
+      {% for cam in campaigns %}
+        <li class="item">
+
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+            <div>
+              <strong>{{ cam.title }}</strong><br>
+              <span class="muted">
+                Charity: {{ cam.charity.name if cam.charity else "Unassigned" }}
+                {% if cam.starts_at and cam.ends_at %}
+                  | {{ cam.starts_at.strftime('%Y-%m-%d %H:%M') }} →
+                    {{ cam.ends_at.strftime('%Y-%m-%d %H:%M') }}
+                {% endif %}
+              </span>
+            </div>
+
+            {% if cam.status == "ACTIVE" %}
+              <span class="badge badge-success">ACTIVE</span>
+            {% elif cam.status == "EXPIRED" %}
+              <span class="badge badge-danger">EXPIRED</span>
+            {% elif cam.status == "UPCOMING" %}
+              <span class="badge badge-info">UPCOMING</span>
+            {% elif cam.status == "DRAFT" %}
+              <span class="badge badge-warn">DRAFT</span>
+            {% else %}
+              <span class="badge">{{ cam.status }}</span>
+            {% endif %}
+          </div>
+
+          <div class="actions">
+            <a class="btn" href="{{ url_for('admin.issue_qr_page', campaign_id=cam.id) }}">
+              Issue QR
+            </a>
+
+            <a class="btn secondary" href="{{ url_for('admin.new_collector', campaign_id=cam.id) }}">
+              Add Collector
+            </a>
+          </div>
+
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No campaigns yet.</p>
+  {% endif %}
+</div>
+  </div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row">
+    <div class="card">
+      <h2>Verify a collector</h2>
+      <p>Scan the QR code shown by the collector to see if the campaign is verified.</p>
+      <a class="btn" href="/scan">Scan QR</a>
+    </div>
+
+    <div class="card">
+      <h2>How it works</h2>
+      <ol>
+        <li>Charity issues a time-limited QR code for a campaign.</li>
+        <li>You scan it at the doorstep.</li>
+        <li>The website verifies the code and shows the result instantly.</li>
+      </ol>
+      <p class="muted">If no QR code is provided, treat the collection with caution.</p>
+    </div>
+  </div>
+{% endblock %}
