@@ -1,6 +1,5 @@
 from datetime import datetime
-from app import db
-from werkzeug.utils import secure_filename  
+from app import db 
 
 class Charity(db.Model):
     __tablename__ = "charities"
