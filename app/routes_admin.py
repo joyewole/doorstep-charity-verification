@@ -6,6 +6,7 @@ from app.models import Charity, Campaign, IssuedQR, Collector
 from app.services.token_service import sign_payload, token_hash
 from app.services.qr_service import make_qr_png
 from werkzeug.utils import secure_filename
+from flask_login import login_required
 
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
@@ -16,6 +17,7 @@ def allowed_file(filename: str) -> bool:
 admin_bp = Blueprint("admin", __name__)
 
 @admin_bp.get("/")
+@login_required
 def dashboard():
     charities = Charity.query.order_by(Charity.name.asc()).all()
     campaigns = Campaign.query.order_by(Campaign.created_at.desc()).all()
@@ -24,10 +26,12 @@ def dashboard():
 # -------- For Charities --------
 
 @admin_bp.get("/charities/new")
+@login_required
 def new_charity():
     return render_template("admin/create_charity.html")
 
 @admin_bp.post("/charities/new")
+@login_required
 def create_charity():
     name = request.form.get("name", "").strip()
     reg = request.form.get("registration_number", "").strip()
@@ -53,11 +57,13 @@ def create_charity():
 # -------- For Campaigns --------
 
 @admin_bp.get("/campaigns/new")
+@login_required
 def new_campaign():
     charities = Charity.query.order_by(Charity.name.asc()).all()
     return render_template("admin/create_campaign.html", charities=charities)
 
 @admin_bp.post("/campaigns/new")
+@login_required
 def create_campaign():
     charity_id = request.form.get("charity_id", "").strip()
     title = request.form.get("title", "").strip()
@@ -100,6 +106,7 @@ def create_campaign():
     return redirect(url_for("admin.dashboard"))
 
 @admin_bp.get("/campaigns/<int:campaign_id>/edit")
+@login_required
 def edit_campaign(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
     charities = Charity.query.order_by(Charity.name.asc()).all()
@@ -107,6 +114,7 @@ def edit_campaign(campaign_id: int):
 
 
 @admin_bp.post("/campaigns/<int:campaign_id>/edit")
+@login_required
 def update_campaign(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
 
@@ -150,6 +158,7 @@ def update_campaign(campaign_id: int):
     return redirect(url_for("admin.dashboard"))
 
 @admin_bp.post("/campaigns/<int:campaign_id>/delete")
+@login_required
 def delete_campaign(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
 
@@ -168,6 +177,7 @@ def delete_campaign(campaign_id: int):
     return redirect(url_for("admin.dashboard"))
 
 @admin_bp.post("/campaigns/<int:campaign_id>/issue-qr")
+@login_required
 def issue_qr(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
 
@@ -218,6 +228,7 @@ def issue_qr(campaign_id: int):
     return redirect(url_for("admin.show_qr", issued_id=record.id))
 
 @admin_bp.get("/campaigns/<int:campaign_id>/issued-qrs")
+@login_required
 def issued_qrs(campaign_id):
     campaign = Campaign.query.get_or_404(campaign_id)
     issued_list = (
@@ -234,6 +245,7 @@ def issued_qrs(campaign_id):
 
 
 @admin_bp.post("/issued-qrs/<int:issued_id>/revoke")
+@login_required
 def revoke_issued_qr(issued_id):
     issued = IssuedQR.query.get_or_404(issued_id)
 
@@ -247,6 +259,7 @@ def revoke_issued_qr(issued_id):
     return redirect(url_for("admin.issued_qrs", campaign_id=issued.campaign_id))
 
 @admin_bp.get("/issued/<int:issued_id>")
+@login_required
 def show_qr(issued_id: int):
     issued = IssuedQR.query.get_or_404(issued_id)
     campaign = Campaign.query.get_or_404(issued.campaign_id)
@@ -254,9 +267,8 @@ def show_qr(issued_id: int):
 
     return render_template("admin/issued_qr.html", issued=issued, campaign=campaign, charity=charity)
 
-import os
-
 @admin_bp.get("/issued/<int:issued_id>/qr.png")
+@login_required
 def issued_qr_png(issued_id: int):
     issued = IssuedQR.query.get_or_404(issued_id)
 
@@ -267,12 +279,14 @@ def issued_qr_png(issued_id: int):
     return Response(png_bytes, mimetype="image/png")
 
 @admin_bp.get("/campaigns/<int:campaign_id>/collectors/new")
+@login_required
 def new_collector(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
     charity = Charity.query.get_or_404(campaign.charity_id)
     return render_template("admin/create_collector.html", campaign=campaign, charity=charity)
 
 @admin_bp.post("/campaigns/<int:campaign_id>/collectors/new")
+@login_required
 def create_collector(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
 
@@ -311,6 +325,7 @@ def create_collector(campaign_id: int):
     return redirect(url_for("admin.dashboard"))
 
 @admin_bp.get("/campaigns/<int:campaign_id>/issue-qr")
+@login_required
 def issue_qr_page(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
     collectors = Collector.query.filter_by(campaign_id=campaign_id).all()

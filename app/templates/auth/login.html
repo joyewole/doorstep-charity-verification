@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 420px; margin: 40px auto;">
+  <h2>Admin Login</h2>
+  <p class="muted">Sign in to manage charities, campaigns, collectors and QR codes.</p>
+
+  <form method="post" action="{{ url_for('auth.login') }}">
+    <div style="margin-bottom: 12px;">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+
+    <button type="submit" class="btn">Login</button>
+  </form>
+</div>
+{% endblock %}
