@@ -8,7 +8,6 @@
       {% elif status == 'EXPIRED' %}status-warning
       {% else %}status-invalid
       {% endif %}">
-  
       <h2>
         {% if status == "VERIFIED" %}
           ✅ VERIFIED
@@ -20,14 +19,15 @@
           ❌ NOT VERIFIED
         {% endif %}
       </h2>
+    </div>
 
-</div>
-      <p class="muted">This QR code is valid and was successfully issued by this system for an authorised campaign.
+    {% if status == "VERIFIED" %}
+      <p class="muted">
+        This QR code is valid and was successfully issued by this system for an authorised campaign.
         The token is authentic, has not expired and has not been revoked.
-        You may proceed with confidence — this campaign and it's associated reward or action are genuine.
       </p>
 
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;">
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
 
       <h3>Charity</h3>
       <p><strong>Name:</strong> {{ details.charity_name }}</p>
@@ -36,68 +36,46 @@
         <p><strong>Website:</strong> {{ details.charity_website }}</p>
       {% endif %}
 
-      <h3 style="margin-top: 16px;">Campaign</h3>
+      <h3 style="margin-top:16px;">Campaign</h3>
       <p><strong>Title:</strong> {{ details.campaign_title }}</p>
       {% if details.campaign_description %}
         <p><strong>Description:</strong> {{ details.campaign_description }}</p>
       {% endif %}
       <p><strong>Dates:</strong> {{ details.campaign_start }} → {{ details.campaign_end }}</p>
-      
+
       <h3 style="margin-top:16px;">Authorised Collector</h3>
-
       <div class="collector-card">
-
         {% if details.collector_photo %}
-        <div class="collector-photo">
-          <img src="/static/uploads/{{ details.collector_photo }}" alt="Collector Photo">
-        </div>
+          <div class="collector-photo">
+            <img src="/static/uploads/{{ details.collector_photo }}" alt="Collector Photo">
+          </div>
         {% endif %}
-
         <div class="collector-info">
           <p><strong>Name:</strong> {{ details.collector_name }}</p>
           <p><strong>Badge ID:</strong> {{ details.collector_badge }}</p>
           <p class="muted">Authorised fundraiser for this campaign</p>
         </div>
-
       </div>
 
-      <p class="muted" style="margin-top: 12px;">
-        Token expires: {{ details.token_expires_at }}
-      </p>
+      <p class="muted" style="margin-top:12px;">Token expires: {{ details.token_expires_at }}</p>
 
     {% elif status == "EXPIRED" %}
-      <p class="muted">This QR code was originally valid and issued by this system, but it has now expired.
-        The associated campaign has either ended or the token validity period has passed.
-        Please contact the campaign organiser if you believe this is an error.
-      </p>
+      <p class="muted">This QR code was issued by this system, but it has now expired.</p>
 
     {% elif status == "NOT ISSUED" %}
-      <p class="muted">This token contains a valid signature but was not issued by this system.
-        It may belong to a different campaign provider or an unauthorised source.
-        We cannot confirm the authenticity or legitimacy of this campaign.
-        Please proceed with caution.
-      </p>
+      <p class="muted">Valid signature, but this token was not issued by this system.</p>
 
     {% elif status == "REVOKED" %}
-      <p class="muted">This QR code was previously issued by this system but has since been revoked by an administrator.
-        This may be due to campaign cancellation, suspected misuse or security concerns.
-        The token is no longer valid and should not be accepted
-      </p>
+      <p class="muted">This token was revoked by an administrator.</p>
 
     {% elif status == "NO TOKEN" %}
-      <p class="muted">No token was detected.
-        Please scan a valid QR code to verify its authenticity and campaign status.
-      </p>
+      <p class="muted">No token was detected. Please scan a valid QR code.</p>
 
     {% else %}
-      <p class="muted">This QR code is not valid or may have been altered.
-        The token signature could not be verified by this system.
-        The associated campaign may be fraudulent, unofficial or tampered with.
-        Do not trust this QR code unless verified through an authorised source.
-      </p>
+      <p class="muted">This QR code is not valid or may have been altered.</p>
     {% endif %}
 
-    <div style="margin-top: 16px;">
+    <div style="margin-top:16px;">
       <a class="btn" href="/scan">Scan another QR</a>
     </div>
   </div>
