@@ -172,7 +172,7 @@ def issue_qr(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
 
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.utcnow()
 
     if campaign.starts_at > now:
         flash("QR codes cannot be issued before the campaign start date.", "error")
@@ -192,13 +192,13 @@ def issue_qr(campaign_id: int):
         flash("Invalid collector selected.", "error")
         return redirect(url_for("admin.issue_qr_page", campaign_id=campaign_id))
 
-    exp = int((datetime.now(tz=timezone.utc) + timedelta(days=7)).timestamp())
+    exp = int((datetime.utcnow() + timedelta(days=7)).timestamp())
 
     payload = {
         "cid": campaign.id,
         "collector_id": collector.id,
         "exp": exp,
-        "n": f"camp-{campaign.id}-col-{collector.id}-{int(datetime.now(tz=timezone.utc).timestamp())}"
+        "n": f"camp-{campaign.id}-col-{collector.id}-{int(datetime.utcnow().timestamp())}"
     }
 
     token = sign_payload(payload)
@@ -208,7 +208,7 @@ def issue_qr(campaign_id: int):
         collector_id=collector.id,
         token=token,
         token_hash=token_hash(token),
-        expires_at=datetime.fromtimestamp(exp, tz=timezone.utc),
+        expires_at=datetime.utcfromtimestamp(exp),
         revoked_at=None,
     )
     db.session.add(record)
@@ -238,7 +238,7 @@ def revoke_issued_qr(issued_id):
     issued = IssuedQR.query.get_or_404(issued_id)
 
     if issued.revoked_at is None:
-        issued.revoked_at = datetime.now(tz=timezone.utc)
+        issued.revoked_at = datetime.utcnow()
         db.session.commit()
         flash("QR token revoked successfully.", "success")
     else:

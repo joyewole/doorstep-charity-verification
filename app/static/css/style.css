@@ -1,9 +1,10 @@
 .btn-danger {
-  background: #dc2626;
-  color: white;
-  border: none;
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #dc2626 !important;
 }
 
 .btn-danger:hover {
-  background: #b91c1c;
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
 }
