@@ -171,6 +171,17 @@ def delete_campaign(campaign_id: int):
 def issue_qr(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
 
+
+    now = datetime.now(tz=timezone.utc)
+
+    if campaign.starts_at > now:
+        flash("QR codes cannot be issued before the campaign start date.", "error")
+        return redirect(url_for("admin.dashboard"))
+
+    if campaign.ends_at < now:
+        flash("This campaign has already ended. QR codes cannot be issued.", "error")
+        return redirect(url_for("admin.dashboard"))
+
     collector_id = request.form.get("collector_id")
     if not collector_id:
         flash("Please select a collector.", "error")
