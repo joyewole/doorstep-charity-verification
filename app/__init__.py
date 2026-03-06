@@ -29,7 +29,11 @@ def create_app():
     from .routes_admin import admin_bp
     app.register_blueprint(public_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
-    with app.app_context():
-        db.create_all()
+    
+    try:
+        with app.app_context():
+            db.create_all()
+    except Exception as e:
+        print("DB init failed:", e)
 
     return app
