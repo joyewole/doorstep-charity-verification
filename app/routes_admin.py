@@ -99,6 +99,74 @@ def create_campaign():
     flash("Campaign created successfully.", "success")
     return redirect(url_for("admin.dashboard"))
 
+@admin_bp.get("/campaigns/<int:campaign_id>/edit")
+def edit_campaign(campaign_id: int):
+    campaign = Campaign.query.get_or_404(campaign_id)
+    charities = Charity.query.order_by(Charity.name.asc()).all()
+    return render_template("admin/edit_campaign.html", campaign=campaign, charities=charities)
+
+
+@admin_bp.post("/campaigns/<int:campaign_id>/edit")
+def update_campaign(campaign_id: int):
+    campaign = Campaign.query.get_or_404(campaign_id)
+
+    charity_id = request.form.get("charity_id", "").strip()
+    title = request.form.get("title", "").strip()
+    description = request.form.get("description", "").strip() or None
+    starts_at = request.form.get("starts_at", "").strip()
+    ends_at = request.form.get("ends_at", "").strip()
+    status = request.form.get("status", "").strip() or "active"
+
+    if not charity_id or not title or not starts_at or not ends_at:
+        flash("Charity, title, start date, and end date are required.", "error")
+        return redirect(url_for("admin.edit_campaign", campaign_id=campaign_id))
+
+    try:
+        start_dt = datetime.fromisoformat(starts_at)
+        end_dt = datetime.fromisoformat(ends_at)
+    except ValueError:
+        flash("Invalid date format. Please use the date picker.", "error")
+        return redirect(url_for("admin.edit_campaign", campaign_id=campaign_id))
+
+    if end_dt <= start_dt:
+        flash("End date must be after start date.", "error")
+        return redirect(url_for("admin.edit_campaign", campaign_id=campaign_id))
+
+    charity = Charity.query.get(int(charity_id))
+    if not charity:
+        flash("Selected charity not found.", "error")
+        return redirect(url_for("admin.edit_campaign", campaign_id=campaign_id))
+
+    campaign.charity_id = charity.id
+    campaign.title = title
+    campaign.description = description
+    campaign.starts_at = start_dt
+    campaign.ends_at = end_dt
+    campaign.status = status
+
+    db.session.commit()
+
+    flash("Campaign updated successfully.", "success")
+    return redirect(url_for("admin.dashboard"))
+
+@admin_bp.post("/campaigns/<int:campaign_id>/delete")
+def delete_campaign(campaign_id: int):
+    campaign = Campaign.query.get_or_404(campaign_id)
+
+    issued = IssuedQR.query.filter_by(campaign_id=campaign_id).first()
+    if issued:
+        flash("Cannot delete this campaign because QR codes have already been issued.", "error")
+        return redirect(url_for("admin.dashboard"))
+
+    # Delete collectors linked to this campaign first
+    Collector.query.filter_by(campaign_id=campaign_id).delete()
+
+    db.session.delete(campaign)
+    db.session.commit()
+
+    flash("Campaign deleted successfully.", "success")
+    return redirect(url_for("admin.dashboard"))
+
 @admin_bp.post("/campaigns/<int:campaign_id>/issue-qr")
 def issue_qr(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
