@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from app import db 
 
 class Charity(db.Model):
@@ -23,6 +23,17 @@ class Campaign(db.Model):
 
     status = db.Column(db.String(20), default="active", nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    @property
+    def computed_status(self):
+        now = datetime.now(timezone.utc)
+
+        if self.starts_at > now:
+            return "UPCOMING"
+        elif self.ends_at < now:
+            return "EXPIRED"
+        else:
+            return "ACTIVE"
 
 class IssuedQR(db.Model):
     __tablename__ = "issued_qr"
