@@ -30,10 +30,8 @@ def create_app():
     app.register_blueprint(public_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
     
-    try:
-        with app.app_context():
-            db.create_all()
-    except Exception as e:
-        print("DB init failed:", e)
+    from . import models
+    with app.app_context():
+        db.create_all()
 
     return app
