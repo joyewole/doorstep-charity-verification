@@ -22,18 +22,17 @@ class Campaign(db.Model):
     ends_at = db.Column(db.DateTime, nullable=False)
 
     status = db.Column(db.String(20), default="active", nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     @property
     def computed_status(self):
         now = datetime.now(timezone.utc)
 
-        if self.starts_at > now:
+        if self.starts_at and self.starts_at > now:
             return "UPCOMING"
-        elif self.ends_at < now:
+        elif self.ends_at and self.ends_at < now:
             return "EXPIRED"
-        else:
-            return "ACTIVE"
+        return "ACTIVE"
 
 class IssuedQR(db.Model):
     __tablename__ = "issued_qr"
