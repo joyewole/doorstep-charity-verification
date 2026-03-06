@@ -22,11 +22,11 @@ class Campaign(db.Model):
     ends_at = db.Column(db.DateTime, nullable=False)
 
     status = db.Column(db.String(20), default="active", nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     @property
     def computed_status(self):
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
 
         if self.starts_at and self.starts_at > now:
             return "UPCOMING"
