@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Edit Campaign</h2>
+
+  <form method="post" action="{{ url_for('admin.update_campaign', campaign_id=campaign.id) }}">
+    <label>Charity</label>
+    <select name="charity_id" required>
+      {% for charity in charities %}
+        <option value="{{ charity.id }}" {% if charity.id == campaign.charity_id %}selected{% endif %}>
+          {{ charity.name }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <label>Title</label>
+    <input type="text" name="title" value="{{ campaign.title }}" required>
+
+    <label>Description</label>
+    <textarea name="description">{{ campaign.description or '' }}</textarea>
+
+    <label>Start Date</label>
+    <input type="datetime-local" name="starts_at" value="{{ campaign.starts_at.strftime('%Y-%m-%dT%H:%M') }}" required>
+
+    <label>End Date</label>
+    <input type="datetime-local" name="ends_at" value="{{ campaign.ends_at.strftime('%Y-%m-%dT%H:%M') }}" required>
+
+    <label>Status</label>
+    <select name="status">
+      <option value="active" {% if campaign.status == 'active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if campaign.status == 'inactive' %}selected{% endif %}>Inactive</option>
+      <option value="closed" {% if campaign.status == 'closed' %}selected{% endif %}>Closed</option>
+    </select>
+
+    <div style="margin-top:16px;">
+      <button type="submit" class="btn">Save Changes</button>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
