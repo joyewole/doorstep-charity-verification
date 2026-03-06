@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card">
+    <h2>Issued QRs</h2>
+    <p class="muted">
+      Campaign: <strong>{{ campaign.title }}</strong>
+      {% if campaign.charity %} ({{ campaign.charity.name }}) {% endif %}
+    </p>
+
+    <div class="actions">
+      <a class="btn outline" href="{{ url_for('admin.dashboard') }}">Back to Dashboard</a>
+      <a class="btn" href="{{ url_for('admin.issue_qr_page', campaign_id=campaign.id) }}">Issue New QR</a>
+    </div>
+  </div>
+
+  <div class="card">
+    {% if issued_list %}
+      <ul class="clean">
+        {% for item in issued_list %}
+          <li class="item">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+              <div>
+                <strong>Collector ID:</strong> {{ item.collector_id }}<br>
+                <span class="muted">
+                  Created: {{ item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else '—' }} |
+                  Expires: {{ item.expires_at.strftime('%Y-%m-%d %H:%M') if item.expires_at else '—' }}
+                </span>
+              </div>
+
+              {% if item.revoked_at %}
+                <span class="badge badge-danger">REVOKED</span>
+              {% else %}
+                <span class="badge badge-success">ACTIVE</span>
+              {% endif %}
+            </div>
+
+            {% if item.revoked_at %}
+              <p class="muted" style="margin-top:8px;">
+                Revoked at: {{ item.revoked_at.strftime('%Y-%m-%d %H:%M') }}
+              </p>
+            {% else %}
+              <form method="POST" action="{{ url_for('admin.revoke_issued_qr', issued_id=item.id) }}" style="margin-top:10px;">
+                <button class="btn secondary" type="submit">Revoke</button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No QR tokens have been issued for this campaign yet.</p>
+    {% endif %}
+  </div>
+{% endblock %}

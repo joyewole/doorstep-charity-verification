@@ -138,6 +138,35 @@ def issue_qr(campaign_id: int):
     flash("QR issued successfully.", "success")
     return redirect(url_for("admin.show_qr", issued_id=record.id))
 
+@admin_bp.get("/campaigns/<int:campaign_id>/issued-qrs")
+def issued_qrs(campaign_id):
+    campaign = Campaign.query.get_or_404(campaign_id)
+    issued_list = (
+        IssuedQR.query
+        .filter_by(campaign_id=campaign_id)
+        .order_by(IssuedQR.created_at.desc())
+        .all()
+    )
+    return render_template(
+        "admin/issued_qrs_list.html",
+        campaign=campaign,
+        issued_list=issued_list
+    )
+
+
+@admin_bp.post("/issued-qrs/<int:issued_id>/revoke")
+def revoke_issued_qr(issued_id):
+    issued = IssuedQR.query.get_or_404(issued_id)
+
+    if issued.revoked_at is None:
+        issued.revoked_at = datetime.now(tz=timezone.utc)
+        db.session.commit()
+        flash("QR token revoked successfully.", "success")
+    else:
+        flash("This token is already revoked.", "error")
+
+    return redirect(url_for("admin.issued_qrs", campaign_id=issued.campaign_id))
+
 @admin_bp.get("/issued/<int:issued_id>")
 def show_qr(issued_id: int):
     issued = IssuedQR.query.get_or_404(issued_id)

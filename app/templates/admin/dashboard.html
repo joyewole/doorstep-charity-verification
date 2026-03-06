@@ -68,13 +68,32 @@
           </div>
 
           <div class="actions">
-            <a class="btn" href="{{ url_for('admin.issue_qr_page', campaign_id=cam.id) }}">
-              Issue QR
-            </a>
 
-            <a class="btn secondary" href="{{ url_for('admin.new_collector', campaign_id=cam.id) }}">
-              Add Collector
-            </a>
+            {% if cam.status == "ACTIVE" %}
+              <a class="btn" href="{{ url_for('admin.issue_qr_page', campaign_id=cam.id) }}">
+                Issue QR
+              </a>
+
+              <a class="btn secondary" href="{{ url_for('admin.new_collector', campaign_id=cam.id) }}">
+                Add Collector
+              </a>
+
+              <a class="btn outline" href="{{ url_for('admin.issued_qrs', campaign_id=cam.id) }}">
+                View Issued QRs
+              </a>
+
+            {% elif cam.status == "UPCOMING" %}
+              <span class="muted">Campaign not started yet</span>
+
+              <a class="btn secondary" href="{{ url_for('admin.new_collector', campaign_id=cam.id) }}">
+                Add Collector
+              </a>
+
+            {% elif cam.status == "EXPIRED" %}
+              <span class="muted">Campaign has ended</span>
+
+            {% endif %}
+
           </div>
 
         </li>
