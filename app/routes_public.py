@@ -8,7 +8,14 @@ public_bp = Blueprint("public", __name__)
 
 @public_bp.get("/")
 def home():
-    return render_template("home.html")
+    recent_alerts = (
+        FraudAlert.query
+        .filter_by(is_active=True)
+        .order_by(FraudAlert.published_at.desc(), FraudAlert.created_at.desc())
+        .limit(3)
+        .all()
+    )
+    return render_template("home.html", recent_alerts=recent_alerts)
 
 @public_bp.get("/scan")
 def scan():

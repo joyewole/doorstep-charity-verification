@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block content %}
   <div class="row">
     <div class="card">
@@ -8,11 +9,11 @@
     </div>
 
     <div class="card">
-  <h2>Stay Safe</h2>
-  <p>View recent fraud alerts or report suspicious collectors.</p>
-  <a class="btn" href="/alerts">View Fraud Alerts</a>
-  <a class="btn" href="/report-suspicious">Report Suspicious Activity</a>
-</div>
+      <h2>Stay Safe</h2>
+      <p>View recent fraud alerts or report suspicious collectors.</p>
+      <a class="btn" href="/alerts">View Fraud Alerts</a>
+      <a class="btn" href="/report-suspicious">Report Suspicious Activity</a>
+    </div>
 
     <div class="card">
       <h2>How it works</h2>
@@ -22,6 +23,32 @@
         <li>The website verifies the code and shows the result instantly.</li>
       </ol>
       <p class="muted">If no QR code is provided, treat the collection with caution.</p>
+    </div>
+
+    <div class="card">
+      <h2>Recent Fraud Alerts</h2>
+
+      {% if recent_alerts %}
+        <ul style="padding-left: 18px; margin-bottom: 12px;">
+          {% for alert in recent_alerts %}
+            <li style="margin-bottom: 10px;">
+              <strong>⚠️ {{ alert.title }}</strong><br>
+
+              {% if alert.location %}
+                <small>Location: {{ alert.location }}</small><br>
+              {% endif %}
+
+              {% if alert.published_at %}
+                <small>{{ alert.published_at.strftime('%d %b %Y') }}</small>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+
+        <a class="btn" href="/alerts">See All Alerts</a>
+      {% else %}
+        <p>No recent fraud alerts available.</p>
+      {% endif %}
     </div>
   </div>
 {% endblock %}
