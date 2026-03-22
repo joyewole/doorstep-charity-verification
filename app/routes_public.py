@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 from datetime import datetime, timezone
 
-from app.models import Campaign, Charity, IssuedQR, Collector
+from app.models import Campaign, Charity, IssuedQR, Collector, FraudAlert
 from app.services.token_service import verify_token, token_hash
 
 public_bp = Blueprint("public", __name__)
@@ -57,20 +57,31 @@ def verify_page():
     if not collector or collector.campaign_id != campaign.id:
         return render_template("verify_result.html", status="COLLECTOR NOT FOUND", details=None)
     
+    recent_alerts = (
+        FraudAlert.query
+        .filter_by(is_active=True)
+        .order_by(FraudAlert.published_at.desc(), FraudAlert.created_at.desc())
+        .limit(3)
+        .all()
+    )
+
+    details = {
+        "charity_name": charity.name,
+        "charity_reg": charity.registration_number,
+        "charity_website": charity.website,
+        "campaign_title": campaign.title,
+        "campaign_description": campaign.description,
+        "campaign_start": campaign.starts_at.isoformat(sep=" "),
+        "campaign_end": campaign.ends_at.isoformat(sep=" "),
+        "collector_name": collector.full_name,
+        "collector_badge": collector.badge_number,
+        "collector_photo": collector.photo_filename,
+        "token_expires_at": datetime.fromtimestamp(exp, tz=timezone.utc).isoformat(sep=" "),
+    }
+
     return render_template(
         "verify_result.html",
         status="VERIFIED",
-        details={
-            "charity_name": charity.name,
-            "charity_reg": charity.registration_number,
-            "charity_website": charity.website,
-            "campaign_title": campaign.title,
-            "campaign_description": campaign.description,
-            "campaign_start": campaign.starts_at.isoformat(sep=" "),
-            "campaign_end": campaign.ends_at.isoformat(sep=" "),
-            "collector_name": collector.full_name,
-            "collector_badge": collector.badge_number,
-            "collector_photo": collector.photo_filename,
-            "token_expires_at": datetime.fromtimestamp(exp, tz=timezone.utc).isoformat(sep=" "),
-        },
+        details=details,
+        recent_alerts=recent_alerts
     )

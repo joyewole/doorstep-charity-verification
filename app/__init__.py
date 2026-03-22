@@ -41,10 +41,12 @@ def create_app():
     from .routes_public import public_bp
     from .routes_admin import admin_bp
     from .routes_auth import auth_bp
-    
+    from .alerts import alerts_bp
+
     app.register_blueprint(public_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(auth_bp)
+    app.register_blueprint(alerts_bp)
 
     from . import models
     with app.app_context():

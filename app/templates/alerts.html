@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Fraud Alerts</h2>
+
+{% for alert in alerts %}
+  <div class="card">
+    <h3>{{ alert.title }}</h3>
+    <p>{{ alert.summary }}</p>
+
+    {% if alert.location %}
+      <p><strong>Location:</strong> {{ alert.location }}</p>
+    {% endif %}
+
+    <p><strong>Source:</strong> {{ alert.source }}</p>
+
+    {% if alert.article_url %}
+      <a href="{{ alert.article_url }}" target="_blank">Read more</a>
+    {% endif %}
+  </div>
+{% else %}
+  <p>No alerts available.</p>
+{% endfor %}
+
+{% endblock %}

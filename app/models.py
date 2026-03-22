@@ -82,3 +82,30 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+class FraudAlert(db.Model):
+    __tablename__ = "fraud_alerts"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    source = db.Column(db.String(120), nullable=False)
+    location = db.Column(db.String(120), nullable=True)
+    summary = db.Column(db.Text, nullable=False)
+    article_url = db.Column(db.String(500), nullable=True)
+    category = db.Column(db.String(80), nullable=False, default="fake_collector")
+    published_at = db.Column(db.DateTime, nullable=True)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+class PublicReport(db.Model):
+    __tablename__ = "public_reports"
+
+    id = db.Column(db.Integer, primary_key=True)
+    reporter_name = db.Column(db.String(120), nullable=True)
+    reporter_email = db.Column(db.String(120), nullable=True)
+    location = db.Column(db.String(120), nullable=False)
+    claimed_charity = db.Column(db.String(120), nullable=True)
+    collector_description = db.Column(db.Text, nullable=True)
+    description = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(40), default="pending", nullable=False)
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

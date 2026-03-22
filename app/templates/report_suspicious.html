@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Report Suspicious Collector</h2>
+
+<form method="POST">
+  <label>Name (optional)</label>
+  <input type="text" name="reporter_name">
+
+  <label>Email (optional)</label>
+  <input type="email" name="reporter_email">
+
+  <label>Location</label>
+  <input type="text" name="location" required>
+
+  <label>Claimed Charity</label>
+  <input type="text" name="claimed_charity">
+
+  <label>Collector Description</label>
+  <textarea name="collector_description"></textarea>
+
+  <label>What seemed suspicious?</label>
+  <textarea name="description" required></textarea>
+
+  <button type="submit">Submit Report</button>
+</form>
+
+{% endblock %}
