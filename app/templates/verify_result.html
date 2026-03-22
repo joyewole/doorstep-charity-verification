@@ -75,6 +75,21 @@
       <p class="muted">This QR code is not valid or may have been altered.</p>
     {% endif %}
 
+    {% if recent_alerts %}
+  <div class="card warning-card">
+    <h4>Recent Fraud Alerts</h4>
+    <ul>
+      {% for alert in recent_alerts %}
+        <li>
+          <strong>{{ alert.title }}</strong>
+          {% if alert.location %} - {{ alert.location }}{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <a href="{{ url_for('alerts.alerts_list') }}">View all alerts</a>
+  </div>
+{% endif %}
+
     <div style="margin-top:16px;">
       <a class="btn" href="/scan">Scan another QR</a>
     </div>
