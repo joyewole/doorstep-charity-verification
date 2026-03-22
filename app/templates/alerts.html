@@ -5,7 +5,14 @@
 
 {% for alert in alerts %}
   <div class="card">
-    <h3>{{ alert.title }}</h3>
+    <h3>⚠️ {{ alert.title }}</h3>
+
+    {% if alert.published_at %}
+      <p class="muted">
+        <small>{{ alert.published_at.strftime('%d %b %Y') }}</small>
+      </p>
+    {% endif %}
+
     <p>{{ alert.summary }}</p>
 
     {% if alert.location %}
@@ -15,7 +22,7 @@
     <p><strong>Source:</strong> {{ alert.source }}</p>
 
     {% if alert.article_url %}
-      <a href="{{ alert.article_url }}" target="_blank">Read more</a>
+      <a class="btn" href="{{ alert.article_url }}" target="_blank">Read more</a>
     {% endif %}
   </div>
 {% else %}
