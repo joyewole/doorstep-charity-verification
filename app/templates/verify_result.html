@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
+
+  <!-- MAIN VERIFICATION CARD -->
   <div class="card">
     <h2>Verification Result</h2>
 
@@ -15,6 +17,8 @@
           ⚠️ EXPIRED
         {% elif status == "NO TOKEN" %}
           ℹ️ NO TOKEN
+        {% elif status == "CAMPAIGN EXPIRED" %}
+          ⚠️ CAMPAIGN EXPIRED
         {% else %}
           ❌ NOT VERIFIED
         {% endif %}
@@ -60,13 +64,16 @@
       <p class="muted" style="margin-top:12px;">Token expires: {{ details.token_expires_at }}</p>
 
     {% elif status == "EXPIRED" %}
-      <p class="muted">This QR code was issued by this system, but it has now expired.</p>
+      <p class="muted">This QR code was issued by this system, but it has now expired. It should no longer be trusted.</p>
+
+    {% elif status == "CAMPAIGN EXPIRED" %}
+      <p class="muted">This campaign has ended. Any active collection under this campaign should be treated with caution.</p>
 
     {% elif status == "NOT ISSUED" %}
       <p class="muted">Valid signature, but this token was not issued by this system.</p>
 
     {% elif status == "REVOKED" %}
-      <p class="muted">This token was revoked by an administrator.</p>
+      <p class="muted">This token was revoked by an administrator and is no longer valid.</p>
 
     {% elif status == "NO TOKEN" %}
       <p class="muted">No token was detected. Please scan a valid QR code.</p>
@@ -75,32 +82,35 @@
       <p class="muted">This QR code is not valid or may have been altered.</p>
     {% endif %}
 
-    {% if recent_alerts %}
-  <div class="card">
-    <h3>Recent Fraud Alerts</h3>
-    <ul style="padding-left: 18px;">
-      {% for alert in recent_alerts %}
-        <li style="margin-bottom: 10px;">
-          <strong>⚠️ {{ alert.title }}</strong><br>
-
-          {% if alert.location %}
-            <small>Location: {{ alert.location }}</small><br>
-          {% endif %}
-
-          {% if alert.published_at %}
-            <small>{{ alert.published_at.strftime('%d %b %Y') }}</small>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-
-    <a class="btn" href="/alerts">View All Fraud Alerts</a>
-    <a class="btn" href="/report-suspicious">Report Suspicious Activity</a>
-  </div>
-{% endif %}
-
     <div style="margin-top:16px;">
       <a class="btn" href="/scan">Scan another QR</a>
     </div>
   </div>
+
+  <!-- FRAUD ALERTS (SEPARATE CARD) -->
+  {% if recent_alerts %}
+    <div class="card" style="margin-top:20px;">
+      <h3>Recent Fraud Alerts</h3>
+
+      <ul style="padding-left: 18px;">
+        {% for alert in recent_alerts %}
+          <li style="margin-bottom: 10px;">
+            <strong>⚠️ {{ alert.title }}</strong><br>
+
+            {% if alert.location %}
+              <small>Location: {{ alert.location }}</small><br>
+            {% endif %}
+
+            {% if alert.published_at %}
+              <small>{{ alert.published_at.strftime('%d %b %Y') }}</small>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+
+      <a class="btn" href="/alerts">View All Fraud Alerts</a>
+      <a class="btn" href="/report-suspicious">Report Suspicious Activity</a>
+    </div>
+  {% endif %}
+
 {% endblock %}
