@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card">
+    <h2>Suspicious Activity Reports</h2>
+    <p class="muted">Reports submitted by members of the public for review.</p>
+
+    <div class="actions">
+      <a class="btn outline" href="{{ url_for('admin.dashboard') }}">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <div class="card">
+    {% if reports %}
+      <ul class="clean">
+        {% for report in reports %}
+          <li class="item" style="margin-bottom:18px;">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+              <div>
+                <strong>Location:</strong> {{ report.location }}<br>
+
+                {% if report.claimed_charity %}
+                  <strong>Claimed Charity:</strong> {{ report.claimed_charity }}<br>
+                {% endif %}
+
+                {% if report.reporter_name %}
+                  <strong>Reporter:</strong> {{ report.reporter_name }}<br>
+                {% endif %}
+
+                {% if report.reporter_email %}
+                  <strong>Email:</strong> {{ report.reporter_email }}<br>
+                {% endif %}
+
+                <span class="muted">
+                  Submitted:
+                  {{ report.submitted_at.strftime('%Y-%m-%d %H:%M') if report.submitted_at else '—' }}
+                </span>
+              </div>
+
+              {% if report.status == "pending" %}
+                <span class="badge badge-warning">PENDING</span>
+              {% elif report.status == "reviewed" %}
+                <span class="badge badge-success">REVIEWED</span>
+              {% elif report.status == "escalated" %}
+                <span class="badge badge-danger">ESCALATED</span>
+              {% else %}
+                <span class="badge">DISMISSED</span>
+              {% endif %}
+            </div>
+
+            {% if report.collector_description %}
+              <p style="margin-top:10px;">
+                <strong>Collector Description:</strong> {{ report.collector_description }}
+              </p>
+            {% endif %}
+
+            <p style="margin-top:10px;">
+              <strong>Report Details:</strong> {{ report.description }}
+            </p>
+
+            <form method="POST"
+                  action="{{ url_for('admin.update_report_status', report_id=report.id) }}"
+                  style="margin-top:12px; display:flex; gap:10px; align-items:center;">
+              <label for="status-{{ report.id }}"><strong>Status:</strong></label>
+              <select id="status-{{ report.id }}" name="status">
+                <option value="pending" {% if report.status == "pending" %}selected{% endif %}>Pending</option>
+                <option value="reviewed" {% if report.status == "reviewed" %}selected{% endif %}>Reviewed</option>
+                <option value="escalated" {% if report.status == "escalated" %}selected{% endif %}>Escalated</option>
+                <option value="dismissed" {% if report.status == "dismissed" %}selected{% endif %}>Dismissed</option>
+              </select>
+
+              <button class="btn secondary" type="submit">Update</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No suspicious activity reports have been submitted yet.</p>
+    {% endif %}
+  </div>
+{% endblock %}

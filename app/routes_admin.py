@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
 from datetime import datetime, timezone, timedelta
 from app import db
-from app.models import Charity, Campaign, IssuedQR, Collector
+from app.models import Charity, Campaign, IssuedQR, Collector, PublicReport
 from app.services.token_service import sign_payload, token_hash
 from app.services.qr_service import make_qr_png
 from werkzeug.utils import secure_filename
@@ -41,7 +41,6 @@ def create_charity():
         flash("Name and registration number are required.", "error")
         return redirect(url_for("admin.new_charity"))
 
-    # Prevent duplicate registration numbers
     existing = Charity.query.filter_by(registration_number=reg).first()
     if existing:
         flash("A charity with that registration number already exists.", "error")
@@ -266,6 +265,33 @@ def show_qr(issued_id: int):
     charity = Charity.query.get_or_404(campaign.charity_id)
 
     return render_template("admin/issued_qr.html", issued=issued, campaign=campaign, charity=charity)
+
+@admin_bp.get("/reports")
+@login_required
+def reports_list():
+    reports = (
+        PublicReport.query
+        .order_by(PublicReport.submitted_at.desc())
+        .all()
+    )
+    return render_template("admin/reports_list.html", reports=reports)
+
+@admin_bp.post("/reports/<int:report_id>/status")
+@login_required
+def update_report_status(report_id: int):
+    report = PublicReport.query.get_or_404(report_id)
+    new_status = request.form.get("status", "").strip().lower()
+
+    allowed_statuses = {"pending", "reviewed", "escalated", "dismissed"}
+    if new_status not in allowed_statuses:
+        flash("Invalid report status.", "error")
+        return redirect(url_for("admin.reports_list"))
+
+    report.status = new_status
+    db.session.commit()
+
+    flash("Report status updated successfully.", "success")
+    return redirect(url_for("admin.reports_list"))
 
 @admin_bp.get("/issued/<int:issued_id>/qr.png")
 @login_required
