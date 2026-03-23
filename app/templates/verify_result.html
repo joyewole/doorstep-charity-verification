@@ -13,8 +13,8 @@
       <h2>
         {% if status == "VERIFIED" %}
           ✅ VERIFIED
-        {% elif status == " CAMPAIGN EXPIRED" %}
-          ❌ CAMPAIGN EXPIRED
+        {% elif status == " CAMPAIGN NOT ACTIVE" %}
+          ⚠️ CAMPAIGN NOT ACTIVE
         {% elif status == "NO TOKEN" %}
           ℹ️ NO TOKEN
         {% elif status == "CAMPAIGN EXPIRED" %}
@@ -80,6 +80,12 @@
 
     {% else %}
       <p class="muted">This QR code is not valid or may have been altered.</p>
+    {% endif %}
+
+    {% if status != "VERIFIED" %}
+      <div style="margin-top:16px;">
+        <a class="btn" href="/report-suspicious">Report Suspicious Activity</a>
+      </div>
     {% endif %}
 
     <div style="margin-top:16px;">
