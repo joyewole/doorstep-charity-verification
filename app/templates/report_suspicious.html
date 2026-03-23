@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Report Suspicious Collector</h2>
+<h2>Report a Collector</h2>
 
 <form method="POST">
-  <label>Type of feedback</label>
+  <label>What would you like to report?</label>
   <select name="feedback_type">
-    <option value="suspicious">Suspicious Activity</option>
-    <option value="genuine">Genuine Collector</option>
-  </select>
-  
+  <option value="suspicious">⚠️ Suspicious or Fraudulent Activity</option>
+  <option value="genuine">✅ Genuine / Trusted Collector</option>
+</select>
+
   <label>Name (optional)</label>
   <input type="text" name="reporter_name">
 
@@ -25,7 +25,20 @@
   <label>Collector Description</label>
   <textarea name="collector_description"></textarea>
 
-  <label>What seemed suspicious?</label>
+  <script>
+    const select = document.getElementById("feedback_type");
+    const label = document.getElementById("details-label");
+
+    select.addEventListener("change", function () {
+      if (this.value === "genuine") {
+        label.textContent = "What made the collector seem genuine?";
+      } else {
+        label.textContent = "What seemed suspicious?";
+      }
+    });
+  </script>
+
+  <label>Details</label>
   <textarea name="description" required></textarea>
 
   <button type="submit">Submit Report</button>
