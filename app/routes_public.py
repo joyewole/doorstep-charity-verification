@@ -24,46 +24,7 @@ def scan():
 @public_bp.get("/verify")
 def verify_page():
     token = request.args.get("token", "").strip()
-    if not token:
-        return render_template("verify_result.html", status="NO TOKEN", details=None)
 
-    # 1) Verify signature
-    try:
-        payload = verify_token(token)
-    except Exception:
-        return render_template("verify_result.html", status="INVALID", details=None)
-
-    # 2) Check expiry
-    exp = int(payload.get("exp", 0))
-    now = int(datetime.now(tz=timezone.utc).timestamp())
-    if exp and now > exp:
-        return render_template("verify_result.html", status="EXPIRED", details=None)
-
-    # 3) Check token exists in DB and not revoked - prevents random signed tokens
-    issued = IssuedQR.query.filter_by(token_hash=token_hash(token)).first()
-    if not issued:
-        return render_template("verify_result.html", status="NOT ISSUED", details=None)
-
-    if issued.revoked_at is not None:
-        return render_template("verify_result.html", status="REVOKED", details=None)
-
-    # 4) Load campaign and charity details
-    cid = payload.get("cid")
-    campaign = Campaign.query.get(cid)
-    if not campaign:
-        return render_template("verify_result.html", status="CAMPAIGN NOT FOUND", details=None)
-
-    charity = Charity.query.get(campaign.charity_id)
-    if not charity:
-        return render_template("verify_result.html", status="CHARITY NOT FOUND", details=None)
-    
-    # 5) Load collector details (from token)
-    collector_id = payload.get("collector_id")
-    collector = Collector.query.get(collector_id) if collector_id else None
-
-    if not collector or collector.campaign_id != campaign.id:
-        return render_template("verify_result.html", status="COLLECTOR NOT FOUND", details=None)
-    
     recent_alerts = (
         FraudAlert.query
         .filter_by(is_active=True)
@@ -71,6 +32,89 @@ def verify_page():
         .limit(3)
         .all()
     )
+
+    if not token:
+        return render_template(
+            "verify_result.html",
+            status="NO TOKEN",
+            details=None,
+            recent_alerts=recent_alerts
+        )
+
+    try:
+        payload = verify_token(token)
+    except Exception:
+        return render_template(
+            "verify_result.html",
+            status="INVALID",
+            details=None,
+            recent_alerts=recent_alerts
+        )
+
+    exp = int(payload.get("exp", 0))
+    now = int(datetime.now(tz=timezone.utc).timestamp())
+    if exp and now > exp:
+        return render_template(
+            "verify_result.html",
+            status="EXPIRED",
+            details=None,
+            recent_alerts=recent_alerts
+        )
+
+    issued = IssuedQR.query.filter_by(token_hash=token_hash(token)).first()
+    if not issued:
+        return render_template(
+            "verify_result.html",
+            status="NOT ISSUED",
+            details=None,
+            recent_alerts=recent_alerts
+        )
+
+    if issued.revoked_at is not None:
+        return render_template(
+            "verify_result.html",
+            status="REVOKED",
+            details=None,
+            recent_alerts=recent_alerts
+        )
+
+    cid = payload.get("cid")
+    campaign = Campaign.query.get(cid)
+    if not campaign:
+        return render_template(
+            "verify_result.html",
+            status="CAMPAIGN NOT FOUND",
+            details=None,
+            recent_alerts=recent_alerts
+        )
+
+    if campaign.ends_at and datetime.now(tz=timezone.utc) > campaign.ends_at.replace(tzinfo=timezone.utc):
+        return render_template(
+            "verify_result.html",
+            status="CAMPAIGN EXPIRED",
+            details=None,
+            recent_alerts=recent_alerts
+        )
+
+    charity = Charity.query.get(campaign.charity_id)
+    if not charity:
+        return render_template(
+            "verify_result.html",
+            status="CHARITY NOT FOUND",
+            details=None,
+            recent_alerts=recent_alerts
+        )
+
+    collector_id = payload.get("collector_id")
+    collector = Collector.query.get(collector_id) if collector_id else None
+
+    if not collector or collector.campaign_id != campaign.id:
+        return render_template(
+            "verify_result.html",
+            status="COLLECTOR NOT FOUND",
+            details=None,
+            recent_alerts=recent_alerts
+        )
 
     details = {
         "charity_name": charity.name,

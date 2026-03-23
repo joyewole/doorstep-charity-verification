@@ -76,17 +76,26 @@
     {% endif %}
 
     {% if recent_alerts %}
-  <div class="card warning-card">
-    <h4>Recent Fraud Alerts</h4>
-    <ul>
+  <div class="card">
+    <h3>Recent Fraud Alerts</h3>
+    <ul style="padding-left: 18px;">
       {% for alert in recent_alerts %}
-        <li>
-          <strong>{{ alert.title }}</strong>
-          {% if alert.location %} - {{ alert.location }}{% endif %}
+        <li style="margin-bottom: 10px;">
+          <strong>⚠️ {{ alert.title }}</strong><br>
+
+          {% if alert.location %}
+            <small>Location: {{ alert.location }}</small><br>
+          {% endif %}
+
+          {% if alert.published_at %}
+            <small>{{ alert.published_at.strftime('%d %b %Y') }}</small>
+          {% endif %}
         </li>
       {% endfor %}
     </ul>
-    <a href="{{ url_for('alerts.alerts_list') }}">View all alerts</a>
+
+    <a class="btn" href="/alerts">View All Fraud Alerts</a>
+    <a class="btn" href="/report-suspicious">Report Suspicious Activity</a>
   </div>
 {% endif %}
 
