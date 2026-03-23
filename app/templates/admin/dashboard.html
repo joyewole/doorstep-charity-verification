@@ -8,6 +8,9 @@
     <div style="margin-top: 12px;">
       <a class="btn" href="{{ url_for('admin.new_charity') }}">Add Charity</a>
       <a class="btn" href="{{ url_for('admin.new_campaign') }}" style="margin-left: 8px;">Add Campaign</a>
+      <a class="btn outline" href="{{ url_for('admin.reports_list') }}" style="margin-left: 8px;">
+        View Reports
+      </a>
     </div>
   </div>
 
@@ -79,10 +82,6 @@
 
             <a class="btn outline" href="{{ url_for('admin.edit_campaign', campaign_id=cam.id) }}">
               Edit Campaign
-            </a>
-
-            <a class="btn" href="{{ url_for('admin.reports_list') }}">
-              View Reports
             </a>
 
             <form method="POST"
