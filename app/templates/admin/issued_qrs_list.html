@@ -40,9 +40,21 @@
                 Revoked at: {{ item.revoked_at.strftime('%Y-%m-%d %H:%M') }}
               </p>
             {% else %}
-              <form method="POST" action="{{ url_for('admin.revoke_issued_qr', issued_id=item.id) }}" style="margin-top:10px;">
-                <button class="btn secondary" type="submit">Revoke</button>
-              </form>
+              <div style="margin-top:10px; display:flex; gap:10px;">
+
+  <form method="POST" action="{{ url_for('admin.revoke_issued_qr', issued_id=item.id) }}">
+    <button class="btn secondary" type="submit">Revoke</button>
+  </form>
+
+  <a class="btn" href="{{ url_for('public.verify_page') }}?token={{ item.token }}" target="_blank">
+    Verify
+  </a>
+
+  <a class="btn outline" href="{{ url_for('admin.issued_qr_png', issued_id=item.id) }}" target="_blank">
+    View QR
+  </a>
+
+</div>
             {% endif %}
           </li>
         {% endfor %}
