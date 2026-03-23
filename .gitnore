@@ -3,5 +3,5 @@ venv/
 __pycache__/
 *.pyc
 .env
-instance/app.db
+instance/*.db
 .DS_Store
