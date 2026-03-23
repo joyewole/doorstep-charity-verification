@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card">
+    <h2>Trusted Community Feedback</h2>
+    <p class="muted">Reviewed positive feedback about genuine collectors.</p>
+  </div>
+
+  <div class="card">
+    {% if feedback %}
+      <ul class="clean">
+        {% for report in feedback %}
+          <li class="item" style="margin-bottom:16px;">
+            <strong>✅ Genuine collector reported</strong><br>
+
+            <p><strong>Location:</strong> {{ report.location }}</p>
+
+            {% if report.claimed_charity %}
+              <p><strong>Claimed Charity:</strong> {{ report.claimed_charity }}</p>
+            {% endif %}
+
+            {% if report.collector_description %}
+              <p><strong>Collector Description:</strong> {{ report.collector_description }}</p>
+            {% endif %}
+
+            <p><strong>Details:</strong> {{ report.description }}</p>
+
+            {% if report.submitted_at %}
+              <p class="muted">{{ report.submitted_at.strftime('%d %b %Y') }}</p>
+            {% endif %}
+
+            <span class="badge badge-success">REVIEWED</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No trusted community feedback available.</p>
+    {% endif %}
+  </div>
+{% endblock %}

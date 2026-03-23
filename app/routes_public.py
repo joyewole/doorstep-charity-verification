@@ -18,13 +18,32 @@ def home():
 
     community_reports = (
         PublicReport.query
-        .filter(PublicReport.status.in_(["reviewed", "escalated"]))
+        .filter(
+            PublicReport.status.in_(["reviewed", "escalated"]),
+            PublicReport.feedback_type == "suspicious"
+        )
         .order_by(PublicReport.submitted_at.desc())
         .limit(3)
         .all()
     )
 
-    return render_template("home.html", recent_alerts=recent_alerts, community_reports=community_reports)
+    community_feedback = (
+        PublicReport.query
+        .filter(
+            PublicReport.status == "reviewed",
+            PublicReport.feedback_type == "genuine"
+        )
+        .order_by(PublicReport.submitted_at.desc())
+        .limit(3)
+        .all()
+    )
+
+    return render_template(
+        "home.html",
+        recent_alerts=recent_alerts,
+        community_reports=community_reports,
+        community_feedback=community_feedback
+    )
 
 @public_bp.get("/scan")
 def scan():

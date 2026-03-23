@@ -26,10 +26,37 @@ def report_suspicious():
             claimed_charity=request.form.get("claimed_charity"),
             collector_description=request.form.get("collector_description"),
             description=request.form.get("description", "").strip(),
+            feedback_type=request.form.get("feedback_type", "suspicious")
         )
         db.session.add(report)
         db.session.commit()
         flash("Thank you. Your report has been submitted for review.", "success")
         return redirect(url_for("alerts.report_suspicious"))
-
     return render_template("report_suspicious.html")
+    
+@alerts_bp.get("/community-warnings")
+def community_warnings():
+    warnings = (
+        PublicReport.query
+        .filter(
+            PublicReport.status.in_(["reviewed", "escalated"]),
+            PublicReport.feedback_type == "suspicious"
+        )
+        .order_by(PublicReport.submitted_at.desc())
+        .all()
+    )
+    return render_template("community_warnings.html", warnings=warnings)
+
+
+@alerts_bp.get("/community-feedback")
+def community_feedback():
+    feedback = (
+        PublicReport.query
+        .filter(
+            PublicReport.status == "reviewed",
+            PublicReport.feedback_type == "genuine"
+        )
+        .order_by(PublicReport.submitted_at.desc())
+        .all()
+    )
+    return render_template("community_feedback.html", feedback=feedback)

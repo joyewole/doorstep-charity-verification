@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card">
+    <h2>Community Fraud Warnings</h2>
+    <p class="muted">Reviewed suspicious activity reports submitted by the public.</p>
+  </div>
+
+  <div class="card">
+    {% if warnings %}
+      <ul class="clean">
+        {% for report in warnings %}
+          <li class="item" style="margin-bottom:16px;">
+            <strong>⚠️ Suspicious activity reported</strong><br>
+
+            <p><strong>Location:</strong> {{ report.location }}</p>
+
+            {% if report.claimed_charity %}
+              <p><strong>Claimed Charity:</strong> {{ report.claimed_charity }}</p>
+            {% endif %}
+
+            {% if report.collector_description %}
+              <p><strong>Collector Description:</strong> {{ report.collector_description }}</p>
+            {% endif %}
+
+            <p><strong>Details:</strong> {{ report.description }}</p>
+
+            {% if report.submitted_at %}
+              <p class="muted">{{ report.submitted_at.strftime('%d %b %Y') }}</p>
+            {% endif %}
+
+            {% if report.status == "escalated" %}
+              <span class="badge badge-danger">ESCALATED</span>
+            {% else %}
+              <span class="badge badge-warning">REVIEWED</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No reviewed community warnings available.</p>
+    {% endif %}
+  </div>
+{% endblock %}

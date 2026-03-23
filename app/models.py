@@ -108,4 +108,5 @@ class PublicReport(db.Model):
     collector_description = db.Column(db.Text, nullable=True)
     description = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(40), default="pending", nullable=False)
+    feedback_type = db.Column(db.String(20), default="suspicious", nullable=False)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

@@ -3,13 +3,13 @@
 {% block content %}
   <div class="row">
     <div class="card">
-      <h2>Verify a collector</h2>
+      <h2>Verify a collector ✅</h2>
       <p>Scan the QR code shown by the collector to see if the campaign is verified.</p>
       <a class="btn" href="/scan">Scan QR</a>
     </div>
 
     <div class="card">
-      <h2>Stay Safe</h2>
+      <h2>Stay Safe 🚨</h2>
       <p>Report suspicious collectors to help prevent fraud in your area.</p>
       <a class="btn" href="/report-suspicious">Report Suspicious Activity</a>
     </div>
@@ -25,7 +25,7 @@
     </div>
 
     <div class="card">
-      <h2>Recent Fraud Alerts</h2>
+      <h2>Recent Fraud Alerts ⚠️</h2>
 
       {% if recent_alerts %}
         <ul style="padding-left: 18px; margin-bottom: 12px;">
@@ -52,30 +52,57 @@
   </div>
 
     <div class="card">
-      <h2>Community Fraud Warnings</h2>
+  <h2>Community Fraud Warnings ⚠️</h2>
 
-      {% if community_reports %}
-        <ul style="padding-left: 18px; margin-bottom: 12px;">
-          {% for report in community_reports %}
-            <li style="margin-bottom: 10px;">
-              <strong>⚠️ Suspicious activity reported</strong><br>
+  {% if community_reports %}
+    <ul style="padding-left: 18px; margin-bottom: 12px;">
+      {% for report in community_reports %}
+        <li style="margin-bottom: 10px;">
+          <strong>⚠️ Suspicious activity reported</strong><br>
+          <small>Location: {{ report.location }}</small><br>
 
-              <small>Location: {{ report.location }}</small><br>
+          {% if report.claimed_charity %}
+            <small>Claimed Charity: {{ report.claimed_charity }}</small><br>
+          {% endif %}
 
-              {% if report.claimed_charity %}
-                <small>Claimed Charity: {{ report.claimed_charity }}</small><br>
-              {% endif %}
+          {% if report.submitted_at %}
+            <small>{{ report.submitted_at.strftime('%d %b %Y') }}</small>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
 
-              {% if report.submitted_at %}
-                <small>{{ report.submitted_at.strftime('%d %b %Y') }}</small>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
+    <a class="btn outline" href="/community-warnings">View Community Warnings</a>
+  {% else %}
+    <p class="muted">No community warnings at this time.</p>
+  {% endif %}
+</div>
 
-        <a class="btn outline" href="/alerts">View Fraud Alerts</a>
-      {% else %}
-        <p class="muted">No community warnings at this time.</p>
-      {% endif %}
-    </div>
+<div class="card">
+  <h2>Trusted Community Feedback</h2>
+
+  {% if community_feedback %}
+    <ul style="padding-left: 18px; margin-bottom: 12px;">
+      {% for report in community_feedback %}
+        <li style="margin-bottom: 10px;">
+          <strong>✅ Genuine collector reported</strong><br>
+
+          <small>Location: {{ report.location }}</small><br>
+
+          {% if report.claimed_charity %}
+            <small>Claimed Charity: {{ report.claimed_charity }}</small><br>
+          {% endif %}
+
+          {% if report.submitted_at %}
+            <small>{{ report.submitted_at.strftime('%d %b %Y') }}</small>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+
+    <a class="btn outline" href="/community-feedback">View Trusted Feedback</a>
+  {% else %}
+    <p class="muted">No trusted community feedback at this time.</p>
+  {% endif %}
+</div>
 {% endblock %}

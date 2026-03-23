@@ -4,6 +4,12 @@
 <h2>Report Suspicious Collector</h2>
 
 <form method="POST">
+  <label>Type of feedback</label>
+  <select name="feedback_type">
+    <option value="suspicious">Suspicious Activity</option>
+    <option value="genuine">Genuine Collector</option>
+  </select>
+  
   <label>Name (optional)</label>
   <input type="text" name="reporter_name">
 
