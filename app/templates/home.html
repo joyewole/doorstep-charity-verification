@@ -50,4 +50,32 @@
       {% endif %}
     </div>
   </div>
+
+    <div class="card">
+      <h2>Community Fraud Warnings</h2>
+
+      {% if community_reports %}
+        <ul style="padding-left: 18px; margin-bottom: 12px;">
+          {% for report in community_reports %}
+            <li style="margin-bottom: 10px;">
+              <strong>⚠️ Suspicious activity reported</strong><br>
+
+              <small>Location: {{ report.location }}</small><br>
+
+              {% if report.claimed_charity %}
+                <small>Claimed Charity: {{ report.claimed_charity }}</small><br>
+              {% endif %}
+
+              {% if report.submitted_at %}
+                <small>{{ report.submitted_at.strftime('%d %b %Y') }}</small>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+
+        <a class="btn outline" href="/alerts">View Fraud Alerts</a>
+      {% else %}
+        <p class="muted">No community warnings at this time.</p>
+      {% endif %}
+    </div>
 {% endblock %}

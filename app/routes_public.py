@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 from datetime import datetime, timezone
 
-from app.models import Campaign, Charity, IssuedQR, Collector, FraudAlert
+from app.models import Campaign, Charity, IssuedQR, Collector, FraudAlert, PublicReport
 from app.services.token_service import verify_token, token_hash
 
 public_bp = Blueprint("public", __name__)
@@ -15,7 +15,16 @@ def home():
         .limit(3)
         .all()
     )
-    return render_template("home.html", recent_alerts=recent_alerts)
+
+    community_reports = (
+        PublicReport.query
+        .filter(PublicReport.status.in_(["reviewed", "escalated"]))
+        .order_by(PublicReport.submitted_at.desc())
+        .limit(3)
+        .all()
+    )
+
+    return render_template("home.html", recent_alerts=recent_alerts, community_reports=community_reports)
 
 @public_bp.get("/scan")
 def scan():
