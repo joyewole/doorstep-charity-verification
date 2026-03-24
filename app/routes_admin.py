@@ -179,8 +179,6 @@ def delete_campaign(campaign_id: int):
 @login_required
 def issue_qr(campaign_id: int):
     campaign = Campaign.query.get_or_404(campaign_id)
-
-
     now = datetime.utcnow()
 
     if campaign.starts_at > now:
@@ -201,7 +199,9 @@ def issue_qr(campaign_id: int):
         flash("Invalid collector selected.", "error")
         return redirect(url_for("admin.issue_qr_page", campaign_id=campaign_id))
 
-    exp = int((datetime.utcnow() + timedelta(days=7)).timestamp())
+    default_expiry = now + timedelta(days=7)
+    actual_expiry = min(default_expiry, campaign.ends_at)
+    exp = int(actual_expiry.timestamp())
 
     payload = {
         "cid": campaign.id,
@@ -217,7 +217,7 @@ def issue_qr(campaign_id: int):
         collector_id=collector.id,
         token=token,
         token_hash=token_hash(token),
-        expires_at=datetime.utcfromtimestamp(exp),
+        expires_at=actual_expiry,
         revoked_at=None,
     )
     db.session.add(record)
@@ -226,7 +226,7 @@ def issue_qr(campaign_id: int):
     flash("QR issued successfully.", "success")
     return redirect(url_for("admin.show_qr", issued_id=record.id))
 
-@admin_bp.get("/campaigns/<int:campaign_id>/issued-qrs")
+@admin_bp.get("/campaigns/<int:campaign_id>/issued-qrsß")
 @login_required
 def issued_qrs(campaign_id):
     campaign = Campaign.query.get_or_404(campaign_id)
