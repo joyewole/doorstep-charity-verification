@@ -19,15 +19,21 @@ The goal is to improve transparency and reduce fraudulent charity impersonation.
 ### Admin Interface
 - Create and manage charities
 - Create time bound campaigns
-- Register collectors
+- Register and manage collectors
 - Issue QR codes with signed tokens
 - Revoke issued tokens
+- View and manage reports/feedback from the public
 
 ### Public Interface
 - Scan QR code using mobile browser camera
 - Server-side token verification
 - Expiry and revocation checks
 - Clear verification status messages
+
+### Community Safety Features
+- Report suspicious collectors
+- Submit feedback on verification results
+- View community warnings and alerts
 
 ## Technology Stack
 - Python (Flask)
@@ -37,9 +43,15 @@ The goal is to improve transparency and reduce fraudulent charity impersonation.
 - HTML/CSS
 - html5-qrcode (camera scanning - https://github.com/mebjas/html5-qrcode)
 
+## Database & Migrations
+- SQLite database for development
+- Flask-Migrate (Alembic) for schema version control
+- Versioned migrations stored in `/migrations`
+
 ## Security Measures
 - Cryptographically signed tokens
-- Expiry enforcement
+- Token expiry enforcement
 - Database backed token validation
-- Token hashing
+- Token hashing for secure storage
 - Revocation support
+- Protection against reused or tampered QR codes
