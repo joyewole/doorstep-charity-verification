@@ -1,6 +1,7 @@
-nano .gitignore
 .venv/
 __pycache__/
 *.pyc
 .env
 instance/
+*.db
+.DS_Store
