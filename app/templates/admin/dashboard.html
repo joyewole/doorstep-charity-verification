@@ -68,17 +68,25 @@
 
           <div class="actions" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
 
+          {% if cam.computed_status == "ACTIVE" %}
             <a class="btn" href="{{ url_for('admin.issue_qr_page', campaign_id=cam.id) }}">
               Issue QR
             </a>
+          {% else %}
+            <button class="btn" type="button" disabled style="opacity:0.5; cursor:not-allowed;">
+              Issue QR
+            </button>
+          {% endif %}
 
             <a class="btn secondary" href="{{ url_for('admin.new_collector', campaign_id=cam.id) }}">
               Add Collector
             </a>
 
+          {% if cam.computed_status != "UPCOMING" %}
             <a class="btn outline" href="{{ url_for('admin.issued_qrs', campaign_id=cam.id) }}">
               View Issued QRs
             </a>
+          {% endif %}
 
             <a class="btn outline" href="{{ url_for('admin.edit_campaign', campaign_id=cam.id) }}">
               Edit Campaign
