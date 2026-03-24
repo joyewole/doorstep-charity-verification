@@ -1,7 +1,7 @@
 import sys
 import os
 
-BASE_DIR = os.path.join(os.path.dirname(__file__), "doorstep_verifier")
-sys.path.insert(0, BASE_DIR)
+project_home = '/users/2026/jo5/public_html/doorstep_verifier'
+sys.path.insert(0, project_home)
 
 from run import app as application
