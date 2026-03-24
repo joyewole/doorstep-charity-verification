@@ -83,6 +83,12 @@
     {% endif %}
 
     {% if status != "VERIFIED" %}
+      <p class="muted">
+      If you believe this collector is suspicious, please report it to help protect others.
+      </p>
+    {% endif %}
+
+    {% if status != "VERIFIED" %}
       <div style="margin-top:16px;">
         <a class="btn" href="/report-suspicious">Report Suspicious Activity</a>
       </div>
