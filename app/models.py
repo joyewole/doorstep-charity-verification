@@ -35,6 +35,27 @@ class Campaign(db.Model):
         elif self.ends_at and self.ends_at < now:
             return "EXPIRED"
         return "ACTIVE"
+    
+    @property
+    def has_duplicate_badges(self):
+        seen = {}
+        for collector in self.collectors:
+            badge = collector.badge_number
+            if not badge:
+                continue
+            if badge in seen:
+                return True
+            seen[badge] = True
+
+        for collector in self.collectors:
+            matches = Collector.query.filter(
+                Collector.badge_number == collector.badge_number,
+                Collector.campaign_id != self.id
+            ).count()
+            if matches > 0:
+                return True
+
+        return False
 
 class IssuedQR(db.Model):
     __tablename__ = "issued_qr"
@@ -65,6 +86,13 @@ class Collector(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     campaign = db.relationship("Campaign", backref="collectors")
+    
+    @property
+    def has_duplicate_badge(self):
+        return Collector.query.filter(
+            Collector.badge_number == self.badge_number,
+            Collector.id != self.id
+        ).count() > 0
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"

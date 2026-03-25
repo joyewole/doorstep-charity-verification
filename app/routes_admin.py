@@ -207,7 +207,7 @@ def issue_qr(campaign_id: int):
         "cid": campaign.id,
         "collector_id": collector.id,
         "exp": exp,
-        "n": f"camp-{campaign.id}-col-{collector.id}-{int(datetime.utcnow().timestamp())}"
+        "n": f"camp-{campaign.id}-col-{collector.id}-{int(now.timestamp())}"
     }
 
     token = sign_payload(payload)
@@ -226,7 +226,7 @@ def issue_qr(campaign_id: int):
     flash("QR issued successfully.", "success")
     return redirect(url_for("admin.show_qr", issued_id=record.id))
 
-@admin_bp.get("/campaigns/<int:campaign_id>/issued-qrsß")
+@admin_bp.get("/campaigns/<int:campaign_id>/issued-qrs")
 @login_required
 def issued_qrs(campaign_id):
     campaign = Campaign.query.get_or_404(campaign_id)
@@ -338,16 +338,22 @@ def create_collector(campaign_id: int):
         photo_filename = f"campaign{campaign_id}_{int(datetime.utcnow().timestamp())}_{safe}"
         photo.save(os.path.join(uploads_dir, photo_filename))
 
+    existing_badge = Collector.query.filter_by(badge_number=badge_number).first()
+    duplicate_badge_detected = existing_badge is not None
+
     collector = Collector(
         campaign_id=campaign_id,
         full_name=full_name,
         badge_number=badge_number,
-        photo_filename=photo_filename,
+        photo_filename=photo_filename, 
     )
     db.session.add(collector)
     db.session.commit()
 
-    flash("Collector added successfully.", "success")
+    if duplicate_badge_detected:
+        flash("Collector added, but warning: this badge number is already assigned to another collector.", "error")
+    else:
+        flash("Collector added successfully.", "success")
     return redirect(url_for("admin.dashboard"))
 
 @admin_bp.get("/campaigns/<int:campaign_id>/issue-qr")

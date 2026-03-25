@@ -64,6 +64,9 @@
             {% elif cam.computed_status == "UPCOMING" %}
               <span class="badge badge-info">UPCOMING</span>
             {% endif %}
+            {% if cam.has_duplicate_badges %}
+              <span class="badge badge-danger">DUPLICATE BADGE WARNING</span>
+            {% endif %}
           </div>
 
           <div class="actions" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">

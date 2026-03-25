@@ -144,6 +144,11 @@ def verify_page():
             recent_alerts=recent_alerts
         )
 
+    duplicate_badge_warning = Collector.query.filter(
+        Collector.badge_number == collector.badge_number,
+        Collector.id != collector.id
+    ).count() > 0
+
     details = {
         "charity_name": charity.name,
         "charity_reg": charity.registration_number,
@@ -162,5 +167,7 @@ def verify_page():
         "verify_result.html",
         status="VERIFIED",
         details=details,
-        recent_alerts=recent_alerts
+        recent_alerts=recent_alerts,
+        duplicate_badge_warning=duplicate_badge_warning
     )
+
