@@ -138,3 +138,20 @@ class PublicReport(db.Model):
     status = db.Column(db.String(40), default="pending", nullable=False)
     feedback_type = db.Column(db.String(20), default="suspicious", nullable=False)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+class ScanEvent(db.Model):
+    __tablename__ = "scan_events"
+
+    id = db.Column(db.Integer, primary_key=True)
+    issued_qr_id = db.Column(db.Integer, db.ForeignKey("issued_qr.id"), nullable=True)
+    token_hash = db.Column(db.String(128), nullable=True)
+    status = db.Column(db.String(40), nullable=False)
+    scanned_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    ip_address = db.Column(db.String(64), nullable=True)
+    user_agent = db.Column(db.String(255), nullable=True)
+
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+
+    issued_qr = db.relationship("IssuedQR", backref="scan_events")

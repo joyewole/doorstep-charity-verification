@@ -41,6 +41,16 @@
       </div>
     {% endif %}
 
+    {% if high_scan_activity %}
+      <div class="card" style="margin-top:16px;">
+        <h3>Scan Activity Warning</h3>
+          <p class="muted">
+            This QR code has been scanned multiple times in a short period.
+            This may indicate the code has been copied or shared.
+          </p>
+      </div>
+    {% endif %}
+
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
 
       <h3>Charity</h3>

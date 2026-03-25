@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
-from app.models import Campaign, Charity, IssuedQR, Collector, FraudAlert, PublicReport
+from app.models import Campaign, Charity, IssuedQR, Collector, FraudAlert, PublicReport, ScanEvent
 from app.services.token_service import verify_token, token_hash
+from app import db
 
 public_bp = Blueprint("public", __name__)
 
@@ -62,6 +63,7 @@ def verify_page():
     )
 
     if not token:
+        log_scan("NO TOKEN")
         return render_template(
             "verify_result.html",
             status="NO TOKEN",
@@ -72,6 +74,7 @@ def verify_page():
     try:
         payload = verify_token(token)
     except Exception:
+        log_scan("INVALID", token=token)
         return render_template(
             "verify_result.html",
             status="INVALID",
@@ -82,6 +85,7 @@ def verify_page():
     exp = int(payload.get("exp", 0))
     now = int(datetime.now(tz=timezone.utc).timestamp())
     if exp and now > exp:
+        log_scan("EXPIRED", token=token)
         return render_template(
             "verify_result.html",
             status="EXPIRED",
@@ -91,6 +95,7 @@ def verify_page():
 
     issued = IssuedQR.query.filter_by(token_hash=token_hash(token)).first()
     if not issued:
+        log_scan("NOT ISSUED", token=token)
         return render_template(
             "verify_result.html",
             status="NOT ISSUED",
@@ -99,6 +104,7 @@ def verify_page():
         )
 
     if issued.revoked_at is not None:
+        log_scan("REVOKED", token=token, issued=issued)
         return render_template(
             "verify_result.html",
             status="REVOKED",
@@ -109,6 +115,7 @@ def verify_page():
     cid = payload.get("cid")
     campaign = Campaign.query.get(cid)
     if not campaign:
+        log_scan("CAMPAIGN NOT FOUND", token=token)
         return render_template(
             "verify_result.html",
             status="CAMPAIGN NOT FOUND",
@@ -117,6 +124,7 @@ def verify_page():
         )
 
     if campaign.ends_at and datetime.now(tz=timezone.utc) > campaign.ends_at.replace(tzinfo=timezone.utc):
+        log_scan("CAMPAIGN EXPIRED", token=token, issued=issued)
         return render_template(
             "verify_result.html",
             status="CAMPAIGN EXPIRED",
@@ -126,6 +134,7 @@ def verify_page():
 
     charity = Charity.query.get(campaign.charity_id)
     if not charity:
+        log_scan("CHARITY NOT FOUND", token=token)
         return render_template(
             "verify_result.html",
             status="CHARITY NOT FOUND",
@@ -137,6 +146,7 @@ def verify_page():
     collector = Collector.query.get(collector_id) if collector_id else None
 
     if not collector or collector.campaign_id != campaign.id:
+        log_scan("COLLECTOR NOT FOUND", token=token)
         return render_template(
             "verify_result.html",
             status="COLLECTOR NOT FOUND",
@@ -163,11 +173,33 @@ def verify_page():
         "token_expires_at": datetime.fromtimestamp(exp, tz=timezone.utc).isoformat(sep=" "),
     }
 
+    recent_scan_count = ScanEvent.query.filter(
+        ScanEvent.issued_qr_id == issued.id,
+        ScanEvent.scanned_at >= datetime.utcnow() - timedelta(minutes=10)
+    ).count()
+
+    high_scan_activity = recent_scan_count >= 5
+
+    log_scan("VERIFIED", token=token, issued=issued)
     return render_template(
         "verify_result.html",
         status="VERIFIED",
         details=details,
         recent_alerts=recent_alerts,
-        duplicate_badge_warning=duplicate_badge_warning
+        duplicate_badge_warning=duplicate_badge_warning,
+        high_scan_activity=high_scan_activity
     )
 
+
+def log_scan(status, token=None, issued=None, latitude=None, longitude=None):
+    event = ScanEvent(
+        issued_qr_id=issued.id if issued else None,
+        token_hash=token_hash(token) if token else None,
+        status=status,
+        ip_address=request.remote_addr,
+        user_agent=request.headers.get("User-agent"),
+        latitude=latitude,
+        longitude=longitude,  
+    )
+    db.session.add(event)
+    db.session.commit()
