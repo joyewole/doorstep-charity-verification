@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
 from datetime import datetime, timezone, timedelta
 from app import db
-from app.models import Charity, Campaign, IssuedQR, Collector, PublicReport
+from app.models import Charity, Campaign, IssuedQR, Collector, PublicReport, ScanEvent
 from app.services.token_service import sign_payload, token_hash
 from app.services.qr_service import make_qr_png
 from werkzeug.utils import secure_filename
@@ -275,6 +275,16 @@ def reports_list():
         .all()
     )
     return render_template("admin/reports_list.html", reports=reports)
+
+@admin_bp.get("/scan-logs")
+@login_required
+def scan_logs():
+    logs = (
+        ScanEvent.query
+        .order_by(ScanEvent.scanned_at.desc())
+        .all()
+    )
+    return render_template("admin/scan_logs.html", logs=logs)
 
 @admin_bp.post("/reports/<int:report_id>/status")
 @login_required

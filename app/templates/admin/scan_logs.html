@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card">
+    <h2>Scan Logs</h2>
+    <p class="muted">Recent QR verification activity recorded by the system.</p>
+
+    <div style="margin-top: 12px;">
+      <a class="btn outline" href="{{ url_for('admin.dashboard') }}">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <div class="card">
+    {% if logs %}
+      <ul class="clean">
+        {% for log in logs %}
+          <li class="item" style="margin-bottom: 16px;">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+              <div>
+                <strong>Status:</strong> {{ log.status }}<br>
+
+                {% if log.issued_qr_id %}
+                  <strong>Issued QR ID:</strong> {{ log.issued_qr_id }}<br>
+                {% endif %}
+
+                {% if log.token_hash %}
+                  <strong>Token Hash:</strong> {{ log.token_hash[:16] }}...<br>
+                {% endif %}
+
+                {% if log.ip_address %}
+                  <strong>IP Address:</strong> {{ log.ip_address }}<br>
+                {% endif %}
+
+                <span class="muted">
+                  Scanned:
+                  {{ log.scanned_at.strftime('%Y-%m-%d %H:%M:%S') if log.scanned_at else '—' }}
+                </span>
+              </div>
+
+              {% if log.status == "VERIFIED" %}
+                <span class="badge badge-success">VERIFIED</span>
+              {% elif log.status in ["EXPIRED", "CAMPAIGN EXPIRED"] %}
+                <span class="badge badge-warning">{{ log.status }}</span>
+              {% else %}
+                <span class="badge badge-danger">{{ log.status }}</span>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No scan activity has been recorded yet.</p>
+    {% endif %}
+  </div>
+{% endblock %}
