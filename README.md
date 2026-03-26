@@ -34,13 +34,13 @@ The goal is to improve transparency, increase public trust and reduce fraudulent
 ### Advanced Fraud Detection Features
 To extend beyond basic verification, the system includes additional safety mechanisms:
 - **Duplicate Badge Detection**  
-  Flags when multiple collectors share the same badge number  
+    - Flags when multiple collectors share the same badge number  
 - **Scan Activity Monitoring**  
-  Logs all QR scans with timestamp and IP address  
+    - Logs all QR scans with timestamp and IP address  
 - **High-Frequency Scan Detection**  
-  Detects unusually frequent scans within short time periods, indicating possible QR code copying or sharing  
+    - Detects unusually frequent scans within short time periods, indicating possible QR code copying or sharing  
 - **Scan Count Transparency**  
-  Displays total scan count to help identify abnormal usage  
+    - Displays total scan count to help identify abnormal usage  
 These features provide an additional layer of protection against misuse and fraud.
 
 ### Community Safety Features
