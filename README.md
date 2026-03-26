@@ -41,7 +41,7 @@ To extend beyond basic verification, the system includes additional safety mecha
     - Detects unusually frequent scans within short time periods, indicating possible QR code copying or sharing  
 - **Scan Count Transparency**  
     - Displays total scan count to help identify abnormal usage  
-These features provide an additional layer of protection against misuse and fraud.
+- These features provide an additional layer of protection against misuse and fraud.
 
 ### Community Safety Features
 - Report suspicious collectors
