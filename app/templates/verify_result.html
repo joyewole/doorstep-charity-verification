@@ -48,13 +48,15 @@
     {% endif %}
 
     {% if high_scan_activity %}
-      <div class="card" style="margin-top:16px;">
-        <h3>Scan Activity Warning</h3>
+      <div class="card" style="margin-top:12px;">
+        <h3>Scan Activity</h3>
           <p class="muted">
-            This QR code has been scanned <b>{{ recent_scan_count }} time</b>{% if recent_scan_count != 1 %}s{% endif %} in the last 10 minutes.
+            This QR code has been scanned 
+            <strong>{{ recent_scan_count }}</strong> time{% if recent_scan_count != 1 %}s{% endif %}
+            in the last 10 minutes.
             This may indicate the code has been copied or shared.
           </p>
-      </div>
+          </div>
     {% endif %}
 
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
