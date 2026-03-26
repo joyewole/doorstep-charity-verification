@@ -180,6 +180,10 @@ def verify_page():
 
     high_scan_activity = recent_scan_count >= 5
 
+    total_scan_count = ScanEvent.query.filter(
+        ScanEvent.issued_qr_id == issued.id
+    ).count()
+
     log_scan("VERIFIED", token=token, issued=issued)
     return render_template(
         "verify_result.html",
@@ -187,7 +191,8 @@ def verify_page():
         details=details,
         recent_alerts=recent_alerts,
         duplicate_badge_warning=duplicate_badge_warning,
-        high_scan_activity=high_scan_activity
+        high_scan_activity=high_scan_activity,
+        total_scan_count=total_scan_count
     )
 
 
