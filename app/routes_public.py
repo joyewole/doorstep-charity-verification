@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, request
 from datetime import datetime, timezone, timedelta
 
+from app import db
 from app.models import Campaign, Charity, IssuedQR, Collector, FraudAlert, PublicReport, ScanEvent
 from app.services.token_service import verify_token, token_hash
-from app import db
 
 public_bp = Blueprint("public", __name__)
+
 
 @public_bp.get("/")
 def home():
@@ -46,9 +47,11 @@ def home():
         community_feedback=community_feedback
     )
 
+
 @public_bp.get("/scan")
 def scan():
     return render_template("scan.html")
+
 
 @public_bp.get("/verify")
 def verify_page():
@@ -63,10 +66,10 @@ def verify_page():
     )
 
     if not token:
-        log_scan("NO TOKEN")
+        log_scan("NO_TOKEN")
         return render_template(
             "verify_result.html",
-            status="NO TOKEN",
+            status="NO_TOKEN",
             details=None,
             recent_alerts=recent_alerts
         )
@@ -83,8 +86,9 @@ def verify_page():
         )
 
     exp = int(payload.get("exp", 0))
-    now = int(datetime.now(tz=timezone.utc).timestamp())
-    if exp and now > exp:
+    now_ts = int(datetime.now(timezone.utc).timestamp())
+
+    if exp and now_ts > exp:
         log_scan("EXPIRED", token=token)
         return render_template(
             "verify_result.html",
@@ -95,10 +99,10 @@ def verify_page():
 
     issued = IssuedQR.query.filter_by(token_hash=token_hash(token)).first()
     if not issued:
-        log_scan("NOT ISSUED", token=token)
+        log_scan("NOT_ISSUED", token=token)
         return render_template(
             "verify_result.html",
-            status="NOT ISSUED",
+            status="NOT_ISSUED",
             details=None,
             recent_alerts=recent_alerts
         )
@@ -113,51 +117,58 @@ def verify_page():
         )
 
     cid = payload.get("cid")
-    campaign = Campaign.query.get(cid)
+    campaign = db.session.get(Campaign, cid)
     if not campaign:
-        log_scan("CAMPAIGN NOT FOUND", token=token)
+        log_scan("CAMPAIGN_NOT_FOUND", token=token)
         return render_template(
             "verify_result.html",
-            status="CAMPAIGN NOT FOUND",
+            status="CAMPAIGN_NOT_FOUND",
             details=None,
             recent_alerts=recent_alerts
         )
 
-    if campaign.ends_at and datetime.now(tz=timezone.utc) > campaign.ends_at.replace(tzinfo=timezone.utc):
-        log_scan("CAMPAIGN EXPIRED", token=token, issued=issued)
+    now = datetime.now(timezone.utc)
+    campaign_end = campaign.ends_at
+    if campaign_end and campaign_end.tzinfo is None:
+        campaign_end = campaign_end.replace(tzinfo=timezone.utc)
+
+    if campaign_end and now > campaign_end:
+        log_scan("CAMPAIGN_EXPIRED", token=token, issued=issued)
         return render_template(
             "verify_result.html",
-            status="CAMPAIGN EXPIRED",
+            status="CAMPAIGN_EXPIRED",
             details=None,
             recent_alerts=recent_alerts
         )
 
-    charity = Charity.query.get(campaign.charity_id)
+    charity = db.session.get(Charity, campaign.charity_id)
     if not charity:
-        log_scan("CHARITY NOT FOUND", token=token)
+        log_scan("CHARITY_NOT_FOUND", token=token)
         return render_template(
             "verify_result.html",
-            status="CHARITY NOT FOUND",
+            status="CHARITY_NOT_FOUND",
             details=None,
             recent_alerts=recent_alerts
         )
 
     collector_id = payload.get("collector_id")
-    collector = Collector.query.get(collector_id) if collector_id else None
+    collector = db.session.get(Collector, collector_id) if collector_id else None
 
     if not collector or collector.campaign_id != campaign.id:
-        log_scan("COLLECTOR NOT FOUND", token=token)
+        log_scan("COLLECTOR_NOT_FOUND", token=token)
         return render_template(
             "verify_result.html",
-            status="COLLECTOR NOT FOUND",
+            status="COLLECTOR_NOT_FOUND",
             details=None,
             recent_alerts=recent_alerts
         )
 
-    duplicate_badge_warning = Collector.query.filter(
-        Collector.badge_number == collector.badge_number,
-        Collector.id != collector.id
-    ).count() > 0
+    duplicate_badge_warning = (
+        Collector.query.filter(
+            Collector.badge_number == collector.badge_number,
+            Collector.id != collector.id
+        ).count() > 0
+    )
 
     details = {
         "charity_name": charity.name,
@@ -165,34 +176,41 @@ def verify_page():
         "charity_website": charity.website,
         "campaign_title": campaign.title,
         "campaign_description": campaign.description,
-        "campaign_start": campaign.starts_at.isoformat(sep=" "),
-        "campaign_end": campaign.ends_at.isoformat(sep=" "),
+        "campaign_start": campaign.starts_at.isoformat(sep=" ") if campaign.starts_at else None,
+        "campaign_end": campaign.ends_at.isoformat(sep=" ") if campaign.ends_at else None,
         "collector_name": collector.full_name,
         "collector_badge": collector.badge_number,
         "collector_photo": collector.photo_filename,
-        "token_expires_at": datetime.fromtimestamp(exp, tz=timezone.utc).isoformat(sep=" "),
+        "token_expires_at": datetime.fromtimestamp(exp, tz=timezone.utc).isoformat(sep=" ") if exp else None,
     }
+
+    log_scan("VERIFIED", token=token, issued=issued)
 
     recent_scan_count = ScanEvent.query.filter(
         ScanEvent.issued_qr_id == issued.id,
-        ScanEvent.scanned_at >= datetime.utcnow() - timedelta(minutes=10)
+        ScanEvent.scanned_at >= datetime.now(timezone.utc) - timedelta(minutes=10)
     ).count()
 
-    high_scan_activity = recent_scan_count >= 5
+    if recent_scan_count >= 10:
+        scan_risk_level = "high"
+    elif recent_scan_count >= 5:
+        scan_risk_level = "medium"
+    else:
+        scan_risk_level = "low"
 
     total_scan_count = ScanEvent.query.filter(
         ScanEvent.issued_qr_id == issued.id
     ).count()
 
-    log_scan("VERIFIED", token=token, issued=issued)
     return render_template(
         "verify_result.html",
         status="VERIFIED",
         details=details,
         recent_alerts=recent_alerts,
         duplicate_badge_warning=duplicate_badge_warning,
-        high_scan_activity=high_scan_activity,
-        total_scan_count=total_scan_count
+        recent_scan_count=recent_scan_count,
+        total_scan_count=total_scan_count,
+        scan_risk_level=scan_risk_level
     )
 
 
@@ -202,9 +220,9 @@ def log_scan(status, token=None, issued=None, latitude=None, longitude=None):
         token_hash=token_hash(token) if token else None,
         status=status,
         ip_address=request.remote_addr,
-        user_agent=request.headers.get("User-agent"),
+        user_agent=request.headers.get("User-Agent"),
         latitude=latitude,
-        longitude=longitude,  
+        longitude=longitude,
     )
     db.session.add(event)
     db.session.commit()

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 
-  <!-- MAIN VERIFICATION CARD -->
   <div class="card">
     <h2>Verification Result</h2>
 
@@ -13,12 +12,22 @@
       <h2>
         {% if status == "VERIFIED" %}
           ✅ VERIFIED
-        {% elif status == " CAMPAIGN NOT ACTIVE" %}
-          ⚠️ CAMPAIGN NOT ACTIVE
         {% elif status == "NO TOKEN" %}
           ℹ️ NO TOKEN
         {% elif status == "CAMPAIGN EXPIRED" %}
           ❌ CAMPAIGN EXPIRED
+        {% elif status == "EXPIRED" %}
+          ⚠️ EXPIRED
+        {% elif status == "REVOKED" %}
+          ❌ REVOKED
+        {% elif status == "NOT ISSUED" %}
+          ⚠️ NOT ISSUED
+        {% elif status == "CHARITY NOT FOUND" %}
+          ⚠️ CHARITY NOT FOUND
+        {% elif status == "COLLECTOR NOT FOUND" %}
+          ⚠️ COLLECTOR NOT FOUND
+        {% elif status == "CAMPAIGN NOT FOUND" %}
+          ⚠️ CAMPAIGN NOT FOUND
         {% else %}
           ⚠️ NOT VERIFIED
         {% endif %}
@@ -31,33 +40,37 @@
         The token is authentic, has not expired and has not been revoked.
       </p>
 
-    {% if status == "VERIFIED" %}
       <p class="muted" style="margin-top:12px;">
-        This QR code has been scanned {{ total_scan_count }} time{% if total_scan_count != 1 %}s{% endif %} in total.
+        This QR code has been scanned <strong>{{ total_scan_count }}</strong> time{% if total_scan_count != 1 %}s{% endif %} in total.
       </p>
-    {% endif %}
 
-    {% if duplicate_badge_warning %}
-      <div class="card" style="margin-top:16px;">
-        <h3>Badge Warning</h3>
+      {% if duplicate_badge_warning %}
+        <div class="card" style="margin-top:16px;">
+          <h3>Badge Warning</h3>
           <p class="muted">
             This badge number appears to be associated with multiple collectors.
             This may indicate duplication or misuse of collector credentials.
           </p>
-      </div>
-    {% endif %}
+        </div>
+      {% endif %}
 
-    {% if high_scan_activity %}
-      <div class="card" style="margin-top:12px;">
-        <h3>Scan Activity</h3>
+      {% if scan_risk_level == "high" %}
+        <div class="card" style="margin-top:16px; border:2px solid #ef4444; background:#fef2f2;">
+          <h3>🚨 High Risk Scan Activity</h3>
           <p class="muted">
-            This QR code has been scanned 
-            <strong>{{ recent_scan_count }}</strong> time{% if recent_scan_count != 1 %}s{% endif %}
-            in the last 10 minutes.
-            This may indicate the code has been copied or shared.
+            This QR code has been scanned <strong>{{ recent_scan_count }}</strong> time{% if recent_scan_count != 1 %}s{% endif %}
+            in the last 10 minutes. This strongly suggests the QR code may have been copied or shared fraudulently.
           </p>
-          </div>
-    {% endif %}
+        </div>
+      {% elif scan_risk_level == "medium" %}
+        <div class="card" style="margin-top:16px; border:2px solid #f59e0b; background:#fffbeb;">
+          <h3>⚠️ Unusual Scan Activity</h3>
+          <p class="muted">
+            This QR code has been scanned <strong>{{ recent_scan_count }}</strong> time{% if recent_scan_count != 1 %}s{% endif %}
+            in the last 10 minutes. This may indicate the code has been shared or reused.
+          </p>
+        </div>
+      {% endif %}
 
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
 
@@ -65,7 +78,12 @@
       <p><strong>Name:</strong> {{ details.charity_name }}</p>
       <p><strong>Registration:</strong> {{ details.charity_reg }}</p>
       {% if details.charity_website %}
-        <p><strong>Website:</strong> {{ details.charity_website }}</p>
+        <p>
+          <strong>Website:</strong>
+          <a href="{{ details.charity_website }}" target="_blank" rel="noopener noreferrer">
+            {{ details.charity_website }}
+          </a>
+        </p>
       {% endif %}
 
       <h3 style="margin-top:16px;">Campaign</h3>
@@ -89,30 +107,59 @@
         </div>
       </div>
 
-      <p class="muted" style="margin-top:12px;">Token expires: {{ details.token_expires_at }}</p>
+      <p class="muted" style="margin-top:12px;">
+        Token expires: {{ details.token_expires_at }}
+      </p>
 
     {% elif status == "EXPIRED" %}
-      <p class="muted">This QR code was issued by this system, but it has now expired. It should no longer be trusted.</p>
+      <p class="muted">
+        This QR code was issued by this system, but it has now expired. It should no longer be trusted.
+      </p>
 
     {% elif status == "CAMPAIGN EXPIRED" %}
-      <p class="muted">This campaign has ended. Any active collection under this campaign should be treated with caution.</p>
+      <p class="muted">
+        This campaign has ended. Any active collection under this campaign should be treated with caution.
+      </p>
 
     {% elif status == "NOT ISSUED" %}
-      <p class="muted">Valid signature, but this token was not issued by this system.</p>
+      <p class="muted">
+        Valid signature, but this token was not issued by this system.
+      </p>
 
     {% elif status == "REVOKED" %}
-      <p class="muted">This token was revoked by an administrator and is no longer valid.</p>
+      <p class="muted">
+        This token was revoked by an administrator and is no longer valid.
+      </p>
 
     {% elif status == "NO TOKEN" %}
-      <p class="muted">No token was detected. Please scan a valid QR code.</p>
+      <p class="muted">
+        No token was detected. Please scan a valid QR code.
+      </p>
+
+    {% elif status == "CHARITY NOT FOUND" %}
+      <p class="muted">
+        The token was recognised, but the linked charity record could not be found.
+      </p>
+
+    {% elif status == "COLLECTOR NOT FOUND" %}
+      <p class="muted">
+        The token was recognised, but the authorised collector record could not be found or does not match the campaign.
+      </p>
+
+    {% elif status == "CAMPAIGN NOT FOUND" %}
+      <p class="muted">
+        The token was recognised, but the linked campaign record could not be found.
+      </p>
 
     {% else %}
-      <p class="muted">This QR code is not valid or may have been altered.</p>
+      <p class="muted">
+        This QR code is not valid or may have been altered.
+      </p>
     {% endif %}
 
     {% if status != "VERIFIED" %}
       <p class="muted">
-      If you believe this collector is suspicious, please report it to help protect others.
+        If you believe this collector is suspicious, please report it to help protect others.
       </p>
     {% endif %}
 
@@ -131,9 +178,9 @@
     <div class="card" style="margin-top:20px;">
       <h3>Recent Fraud Alerts</h3>
 
-      <ul style="padding-left: 18px;">
+      <ul style="padding-left:18px;">
         {% for alert in recent_alerts %}
-          <li style="margin-bottom: 10px;">
+          <li style="margin-bottom:10px;">
             <strong>⚠️ {{ alert.title }}</strong><br>
 
             {% if alert.location %}
