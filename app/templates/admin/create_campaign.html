@@ -5,7 +5,7 @@
 
     {% if not charities %}
       <p class="muted">You must create a charity first.</p>
-      <a class="btn" href="{{ url_for('admin.create_charity') }}">Add Charity</a>
+      <a class="btn" href="{{ url_for('admin.new_charity') }}">Add Charity</a>
       <a class="btn" href="{{ url_for('admin.dashboard') }}" style="background:#475569; margin-left:8px;">Back</a>
     {% else %}
       <form method="POST" action="{{ url_for('admin.create_campaign') }}">
@@ -34,7 +34,7 @@
         <br/><br/>
 
         <button type="submit" class="btn" style="border:none; cursor:pointer;">Save Campaign</button>
-        <a href="{{ url_for('admin.report_dashboard') }}" class="btn" style="background:#475569; margin-left:8px;">Back</a>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn" style="background:#475569; margin-left:8px;">Back</a>
       </form>
     {% endif %}
   </div>
