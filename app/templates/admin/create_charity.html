@@ -3,7 +3,7 @@
   <div class="card">
     <h2>Add Charity</h2>
 
-    <form method="POST" action="/admin/charities/new">
+    <form method="POST" action="{{ url_for('admin.create_charity') }}">
       <label><strong>Name</strong></label><br/>
       <input name="name" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;" required>
       <br/><br/>
@@ -17,7 +17,7 @@
       <br/><br/>
 
       <button type="submit" class="btn" style="border:none; cursor:pointer;">Save Charity</button>
-      <a href="/admin/" class="btn" style="background:#475569; margin-left:8px;">Back</a>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn" style="background:#475569; margin-left:8px;">Back</a>
     </form>
   </div>
 {% endblock %}
