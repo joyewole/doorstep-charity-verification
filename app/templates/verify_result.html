@@ -6,18 +6,21 @@
 
     <div class="verification-status
       {% if status == 'VERIFIED' %}status-valid
-      {% elif status == 'EXPIRED' %}status-warning
-      {% else %}status-invalid
+      {% elif status in ['NO_TOKEN', 'NOT_ISSUED', 'INVALID'] %}status-warning
+      {% elif status in ['EXPIRED', 'REVOKED', 'CAMPAIGN EXPIRED'] %}status-invalid
+      {% else %}status-warning
       {% endif %}">
       <h2>
         {% if status == "VERIFIED" %}
           ✅ VERIFIED
-        {% elif status == "NO TOKEN" %}
-          ℹ️ NO TOKEN
+        {% elif status == "NO_TOKEN" %}
+          ℹ️ READY TO SCAN
+        {% elif status == "INVALID" %}
+          ⚠️ NOT VERIFIED
         {% elif status == "CAMPAIGN EXPIRED" %}
           ❌ CAMPAIGN EXPIRED
         {% elif status == "EXPIRED" %}
-          ⚠️ EXPIRED
+          ❌ EXPIRED
         {% elif status == "REVOKED" %}
           ❌ REVOKED
         {% elif status == "NOT ISSUED" %}
@@ -133,7 +136,7 @@
 
     {% elif status == "NO TOKEN" %}
       <p class="muted">
-        No token was detected. Please scan a valid QR code.
+        No QR code has been scanned yet. Please scan a valid QR code to verify the collector and campaign.
       </p>
 
     {% elif status == "CHARITY NOT FOUND" %}
@@ -164,6 +167,12 @@
     {% endif %}
 
     {% if status != "VERIFIED" %}
+      <div style="margin-top:16px;">
+        <a class="btn" href="/reverse/jo5/report_suspicious">Report Suspicious Activity</a>
+      </div>
+    {% endif %}
+
+    {% if status not in ["VERIFIED", "NO_TOKEN"] %}
       <div style="margin-top:16px;">
         <a class="btn" href="/reverse/jo5/report_suspicious">Report Suspicious Activity</a>
       </div>
