@@ -16,7 +16,7 @@ def alerts_list():
     return render_template("alerts.html", alerts=alerts)
 
 
-@alerts_bp.route("/report-suspicious", methods=["GET", "POST"])
+@alerts_bp.route("/report_suspicious", methods=["GET", "POST"])
 def report_suspicious():
     if request.method == "POST":
         report = PublicReport(
@@ -34,7 +34,7 @@ def report_suspicious():
         return redirect(url_for("alerts.report_suspicious"))
     return render_template("report_suspicious.html")
     
-@alerts_bp.get("/community-warnings")
+@alerts_bp.get("/community_warnings")
 def community_warnings():
     warnings = (
         PublicReport.query
@@ -48,7 +48,7 @@ def community_warnings():
     return render_template("community_warnings.html", warnings=warnings)
 
 
-@alerts_bp.get("/community-feedback")
+@alerts_bp.get("/community_feedback")
 def community_feedback():
     feedback = (
         PublicReport.query
