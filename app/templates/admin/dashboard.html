@@ -6,10 +6,10 @@
     <p class="muted">Create charities and campaigns, then issue QR codes.</p>
 
     <div style="margin-top: 12px;">
-      <a class="btn" href="{{ url_for('admin.new_charity') }}">Add Charity</a>
-      <a class="btn" href="{{ url_for('admin.new_campaign') }}" style="margin-left: 8px;">Add Campaign</a>
-      <a class="btn outline" href="{{ url_for('admin.reports_list') }}" style="margin-left: 8px;">View Reports</a>
-      <a class="btn outline" href="{{ url_for('admin.scan_logs') }}" style="margin-left: 8px;">View Scan Logs</a>
+      <a class="btn" href="/reverse/jo5/admin/charities/new">Add Charity</a>
+      <a class="btn" href="/reverse/jo5/admin/campaigns/new" style="margin-left: 8px;">Add Campaign</a>
+      <a class="btn outline" href="/reverse/jo5/admin/reports" style="margin-left: 8px;">View Reports</a>
+      <a class="btn outline" href="/reverse/jo5/admin/scan-logs" style="margin-left: 8px;">View Scan Logs</a>
     </div>
   </div>
 
@@ -71,36 +71,25 @@
           <div class="actions" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
 
           {% if cam.computed_status == "ACTIVE" %}
-            <a class="btn" href="{{ url_for('admin.issue_qr_page', campaign_id=cam.id) }}">
-              Issue QR
-            </a>
+            <a class="btn" href="/reverse/jo5/admin/campaigns/{{ cam.id }}/issue-qr">Issue QR</a>
           {% else %}
             <button class="btn" type="button" disabled style="opacity:0.5; cursor:not-allowed;">
               Issue QR
             </button>
           {% endif %}
 
-            <a class="btn secondary" href="{{ url_for('admin.new_collector', campaign_id=cam.id) }}">
-              Add Collector
-            </a>
-
+            <a class="btn secondary" href="/reverse/jo5/admin/campaigns/{{ cam.id }}/collectors/new">Add Collector</a>
           {% if cam.computed_status != "UPCOMING" %}
-            <a class="btn outline" href="{{ url_for('admin.issued_qrs', campaign_id=cam.id) }}">
-              View Issued QRs
-            </a>
+            <a class="btn outline" href="/reverse/jo5/admin/campaigns/{{ cam.id }}/issued-qrs">View Issued QRs</a>
           {% endif %}
 
-            <a class="btn outline" href="{{ url_for('admin.edit_campaign', campaign_id=cam.id) }}">
-              Edit Campaign
-            </a>
+            <a class="btn outline" href="/reverse/jo5/admin/campaigns/{{ cam.id }}/edit">Edit Campaign</a>
 
-            <form method="POST"
-                  action="{{ url_for('admin.delete_campaign', campaign_id=cam.id) }}"
-                  onsubmit="return confirm('Are you sure you want to delete this campaign? This cannot be undone.');"
-                  style="display:inline;">
-              <button type="submit" class="btn btn-danger">Delete Campaign</button>
+            <form method="POST" action="/reverse/jo5/admin/campaigns/{{ cam.id }}/delete"
+              onsubmit="return confirm('Are you sure you want to delete this campaign? This cannot be undone.');"
+              style="display:inline;">
+            <button type="submit" class="btn btn-danger">Delete Campaign</button>
             </form>
-
           </div>
 
         </li>

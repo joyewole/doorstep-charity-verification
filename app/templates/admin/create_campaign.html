@@ -6,7 +6,7 @@
     {% if not charities %}
       <p class="muted">You must create a charity first.</p>
       <a class="btn" href="/reverse/jo5/admin/charities/new">Add Charity</a>
-      <a class="btn" href="{{ url_for('admin.dashboard') }}" style="background:#475569; margin-left:8px;">Back</a>
+      <a class="btn" href="/reverse/jo5/admin/" style="background:#475569; margin-left:8px;">Back</a>
     {% else %}
       <form method="POST" action="/reverse/jo5/admin/campaigns/new">
         <label><strong>Charity</strong></label><br/>
@@ -34,7 +34,7 @@
         <br/><br/>
 
         <button type="submit" class="btn" style="border:none; cursor:pointer;">Save Campaign</button>
-        <a href="{{ url_for('admin.dashboard') }}" class="btn" style="background:#475569; margin-left:8px;">Back</a>
+        <a href="/reverse/jo5/admin/" class="btn" style="background:#475569; margin-left:8px;">Back</a>
       </form>
     {% endif %}
   </div>

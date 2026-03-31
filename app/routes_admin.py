@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
+from flask import Blueprint, render_template, request, redirect, flash, Response
 from datetime import datetime, timezone, timedelta
 from app import db
 from app.models import Charity, Campaign, IssuedQR, Collector, PublicReport, ScanEvent
@@ -39,19 +39,19 @@ def create_charity():
 
     if not name or not reg:
         flash("Name and registration number are required.", "error")
-        return redirect(url_for("admin.new_charity"))
+        return redirect("/reverse/jo5/admin/charities/new")
 
     existing = Charity.query.filter_by(registration_number=reg).first()
     if existing:
         flash("A charity with that registration number already exists.", "error")
-        return redirect(url_for("admin.new_charity"))
+        return redirect("/reverse/jo5/admin/charities/new")
 
     charity = Charity(name=name, registration_number=reg, website=website)
     db.session.add(charity)
     db.session.commit()
 
     flash("Charity created successfully.", "success")
-    return redirect(url_for("admin.dashboard"))
+    return redirect("/reverse/jo5/admin/")
 
 # -------- For Campaigns --------
 
@@ -72,23 +72,23 @@ def create_campaign():
 
     if not charity_id or not title or not starts_at or not ends_at:
         flash("Charity, title, start date, and end date are required.", "error")
-        return redirect(url_for("admin.new_campaign"))
+        return redirect("/reverse/jo5/admin/campaigns/new")
 
     try:
         start_dt = datetime.fromisoformat(starts_at)
         end_dt = datetime.fromisoformat(ends_at)
     except ValueError:
         flash("Invalid date format. Please use the date picker.", "error")
-        return redirect(url_for("admin.new_campaign"))
+        return redirect("/reverse/jo5/admin/campaigns/new")
 
     if end_dt <= start_dt:
         flash("End date must be after start date.", "error")
-        return redirect(url_for("admin.new_campaign"))
+        return redirect("/reverse/jo5/admin/campaigns/new")
 
     charity = Charity.query.get(int(charity_id))
     if not charity:
         flash("Selected charity not found.", "error")
-        return redirect(url_for("admin.new_campaign"))
+        return redirect("/reverse/jo5/admin/campaigns/new")
 
     campaign = Campaign(
         charity_id=charity.id,
@@ -102,7 +102,7 @@ def create_campaign():
     db.session.commit()
 
     flash("Campaign created successfully.", "success")
-    return redirect(url_for("admin.dashboard"))
+    return redirect("/reverse/jo5/admin/")
 
 @admin_bp.get("/campaigns/<int:campaign_id>/edit")
 @login_required
@@ -126,23 +126,23 @@ def update_campaign(campaign_id: int):
 
     if not charity_id or not title or not starts_at or not ends_at:
         flash("Charity, title, start date, and end date are required.", "error")
-        return redirect(url_for("admin.edit_campaign", campaign_id=campaign_id))
+        return redirect(f"/reverse/jo5/admin/campaigns/{campaign_id}/edit")
 
     try:
         start_dt = datetime.fromisoformat(starts_at)
         end_dt = datetime.fromisoformat(ends_at)
     except ValueError:
         flash("Invalid date format. Please use the date picker.", "error")
-        return redirect(url_for("admin.edit_campaign", campaign_id=campaign_id))
+        return redirect(f"/reverse/jo5/admin/campaigns/{campaign_id}/edit")
 
     if end_dt <= start_dt:
         flash("End date must be after start date.", "error")
-        return redirect(url_for("admin.edit_campaign", campaign_id=campaign_id))
+        return redirect(f"/reverse/jo5/admin/campaigns/{campaign_id}/edit")
 
     charity = Charity.query.get(int(charity_id))
     if not charity:
         flash("Selected charity not found.", "error")
-        return redirect(url_for("admin.edit_campaign", campaign_id=campaign_id))
+        return redirect(f"/reverse/jo5/admin/campaigns/{campaign_id}/edit")
 
     campaign.charity_id = charity.id
     campaign.title = title
@@ -154,7 +154,7 @@ def update_campaign(campaign_id: int):
     db.session.commit()
 
     flash("Campaign updated successfully.", "success")
-    return redirect(url_for("admin.dashboard"))
+    return redirect("/reverse/jo5/admin/")
 
 @admin_bp.post("/campaigns/<int:campaign_id>/delete")
 @login_required
@@ -164,7 +164,7 @@ def delete_campaign(campaign_id: int):
     issued = IssuedQR.query.filter_by(campaign_id=campaign_id).first()
     if issued:
         flash("Cannot delete this campaign because QR codes have already been issued.", "error")
-        return redirect(url_for("admin.dashboard"))
+        return redirect("/reverse/jo5/admin/")
 
     # Delete collectors linked to this campaign first
     Collector.query.filter_by(campaign_id=campaign_id).delete()
@@ -173,7 +173,7 @@ def delete_campaign(campaign_id: int):
     db.session.commit()
 
     flash("Campaign deleted successfully.", "success")
-    return redirect(url_for("admin.dashboard"))
+    return redirect("/reverse/jo5/admin/")
 
 @admin_bp.post("/campaigns/<int:campaign_id>/issue-qr")
 @login_required
@@ -183,21 +183,21 @@ def issue_qr(campaign_id: int):
 
     if campaign.starts_at > now:
         flash("QR codes cannot be issued before the campaign start date.", "error")
-        return redirect(url_for("admin.dashboard"))
+        return redirect("/reverse/jo5/admin/")
 
     if campaign.ends_at < now:
         flash("This campaign has already ended. QR codes cannot be issued.", "error")
-        return redirect(url_for("admin.dashboard"))
+        return redirect("/reverse/jo5/admin/")
 
     collector_id = request.form.get("collector_id")
     if not collector_id:
         flash("Please select a collector.", "error")
-        return redirect(url_for("admin.issue_qr_page", campaign_id=campaign_id))
+        return redirect(f"/reverse/jo5/admin/campaigns/{campaign_id}/issue-qr")
 
     collector = Collector.query.get(int(collector_id))
     if not collector or collector.campaign_id != campaign_id:
         flash("Invalid collector selected.", "error")
-        return redirect(url_for("admin.issue_qr_page", campaign_id=campaign_id))
+        return redirect(f"/reverse/jo5/admin/campaigns/{campaign_id}/issue-qr")
 
     default_expiry = now + timedelta(days=7)
     actual_expiry = min(default_expiry, campaign.ends_at)
@@ -224,7 +224,7 @@ def issue_qr(campaign_id: int):
     db.session.commit()
 
     flash("QR issued successfully.", "success")
-    return redirect(url_for("admin.show_qr", issued_id=record.id))
+    return redirect(f"/reverse/jo5/admin/issued/{record.id}")
 
 @admin_bp.get("/campaigns/<int:campaign_id>/issued-qrs")
 @login_required
@@ -255,7 +255,7 @@ def revoke_issued_qr(issued_id):
     else:
         flash("This token is already revoked.", "error")
 
-    return redirect(url_for("admin.issued_qrs", campaign_id=issued.campaign_id))
+    return redirect(f"/reverse/jo5/admin/campaigns/{issued.campaign_id}/issued-qrs")
 
 @admin_bp.get("/issued/<int:issued_id>")
 @login_required
@@ -295,20 +295,20 @@ def update_report_status(report_id: int):
     allowed_statuses = {"pending", "reviewed", "escalated", "dismissed"}
     if new_status not in allowed_statuses:
         flash("Invalid report status.", "error")
-        return redirect(url_for("admin.reports_list"))
+        return redirect("/reverse/jo5/admin/reports")
 
     report.status = new_status
     db.session.commit()
 
     flash("Report status updated successfully.", "success")
-    return redirect(url_for("admin.reports_list"))
+    return redirect("/reverse/jo5/admin/reports")
 
 @admin_bp.get("/issued/<int:issued_id>/qr.png")
 @login_required
 def issued_qr_png(issued_id: int):
     issued = IssuedQR.query.get_or_404(issued_id)
 
-    base = os.getenv("PUBLIC_BASE_URL", "https://cs1.ucc.ie/reverse/jo5/")
+    base = os.getenv("PUBLIC_BASE_URL", "https://cs1.ucc.ie/reverse/jo5").rstrip("/")
     verify_url = f"{base}/verify?token={issued.token}"
 
     png_bytes = make_qr_png(verify_url)
@@ -364,7 +364,7 @@ def create_collector(campaign_id: int):
         flash("Collector added, but warning: this badge number is already assigned to another collector.", "error")
     else:
         flash("Collector added successfully.", "success")
-    return redirect(url_for("admin.dashboard"))
+    return redirect("/reverse/jo5/admin/")
 
 @admin_bp.get("/campaigns/<int:campaign_id>/issue-qr")
 @login_required

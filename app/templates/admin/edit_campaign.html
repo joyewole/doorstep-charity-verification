@@ -3,7 +3,7 @@
 <div class="card">
   <h2>Edit Campaign</h2>
 
-  <form method="post" action="{{ url_for('admin.update_campaign', campaign_id=campaign.id) }}">
+  <form method="post" action="/reserve/jo5/admin/campaigns/{{ campaign.id }}/edit">
     <label>Charity</label>
     <select name="charity_id" required>
       {% for charity in charities %}
@@ -34,7 +34,7 @@
 
     <div style="margin-top:16px;">
       <button type="submit" class="btn">Save Changes</button>
-      <a href="{{ url_for('admin.dashboard') }}" class="btn">Cancel</a>
+      <a href="/reverse/jo5/admin/" class="btn">Cancel</a>
     </div>
   </form>
 </div>

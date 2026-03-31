@@ -6,7 +6,7 @@
     <p class="muted">Recent QR verification activity recorded by the system.</p>
 
     <div style="margin-top: 12px;">
-      <a class="btn outline" href="{{ url_for('admin.dashboard') }}">Back to Dashboard</a>
+      <a class="btn outline" href="/reverse/jo5/admin/">Back to Dashboard</a>
     </div>
   </div>
 
@@ -51,5 +51,8 @@
     {% else %}
       <p class="muted">No scan activity has been recorded yet.</p>
     {% endif %}
+    <div class="actions">
+      <a class="btn outline" href="/reverse/jo5/admin/">Back</a>
+    </div>
   </div>
 {% endblock %}

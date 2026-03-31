@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, flash
 from flask_login import login_user, logout_user, login_required
 from app.models import User
 
@@ -15,7 +15,7 @@ def login():
         if user and user.check_password(password):
             login_user(user)
             flash("Logged in successfully.", "success")
-            return redirect(url_for("admin.dashboard"))
+            return redirect("/reverse/jo5/admin/")
 
         flash("Invalid email or password.", "error")
 
@@ -27,4 +27,4 @@ def login():
 def logout():
     logout_user()
     flash("Logged out successfully.", "success")
-    return redirect(url_for("auth.login"))
+    return redirect("/reverse/jo5/login")

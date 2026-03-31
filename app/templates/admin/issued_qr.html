@@ -10,11 +10,11 @@
   <p><strong>Expires:</strong> {{ issued.expires_at }}</p>
 
   <div style="margin-top: 16px;">
-    <img src="{{ url_for('admin.issued_qr_png', issued_id=issued.id) }}" alt="QR Code" style="max-width: 320px; width: 100%; border-radius: 12px; border: 1px solid #e5e7eb;">
+    <img src="/reserve/jo5/admin/issued/{{ issued.id }}/qr.png" alt="QR Code" style="max-width: 320px; width: 100%; border-radius: 12px; border: 1px solid #e5e7eb;">
   </div>
 
   <div style="margin-top: 16px;">
-    <a class="btn" href="{{ url_for('admin.dashboard') }}">Back to Dashboard</a>
+    <a class="btn" href="/reserve/jo5/admin/">Back to Dashboard</a>
   </div>
 </div>
 
