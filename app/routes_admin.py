@@ -308,7 +308,7 @@ def update_report_status(report_id: int):
 def issued_qr_png(issued_id: int):
     issued = IssuedQR.query.get_or_404(issued_id)
 
-    base = os.getenv("PUBLIC_BASE_URL", "https://cs1.ucc.ie/reverse/jo5")
+    base = os.getenv("PUBLIC_BASE_URL", "https://cs1.ucc.ie/reverse/jo5/")
     verify_url = f"{base}/verify?token={issued.token}"
 
     png_bytes = make_qr_png(verify_url)

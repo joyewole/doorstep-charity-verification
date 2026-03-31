@@ -20,7 +20,7 @@ def create_app():
 
     app = Flask(__name__, instance_relative_config=True)
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev")
-    app.config['APPLICATION_ROOT'] = '/reverse/jo5'
+    app.config['APPLICATION_ROOT'] = '/reverse/jo5/'
 
     db_url = os.getenv("DATABASE_URL", "sqlite:////tmp/app.db")
     if db_url.startswith("postgres://"):
