@@ -44,10 +44,10 @@ def create_app():
     from .routes_auth import auth_bp
     from .alerts import alerts_bp
 
-    app.register_blueprint(public_bp)
-    app.register_blueprint(admin_bp, url_prefix="/admin")
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(alerts_bp)
+    app.register_blueprint(public_bp, url_prefix="/reverse/jo5")
+    app.register_blueprint(admin_bp, url_prefix="/reverse/jo5/admin")
+    app.register_blueprint(auth_bp, url_prefix="/reverse/jo5")
+    app.register_blueprint(alerts_bp, url_prefix="/reverse/jo5")
 
     from . import models
     with app.app_context():
