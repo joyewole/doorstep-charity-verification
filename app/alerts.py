@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, flash
 from app import db
 from app.models import FraudAlert, PublicReport
 
@@ -31,7 +31,7 @@ def report_suspicious():
         db.session.add(report)
         db.session.commit()
         flash("Thank you. Your report has been submitted for review.", "success")
-        return redirect(url_for("alerts.report_suspicious"))
+        return redirect(f"/reverse/jo5/report_suspicious")
     return render_template("report_suspicious.html")
     
 @alerts_bp.get("/community_warnings")

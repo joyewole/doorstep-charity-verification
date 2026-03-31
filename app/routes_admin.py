@@ -331,7 +331,7 @@ def create_collector(campaign_id: int):
 
     if not full_name or not badge_number:
         flash("Full name and badge number are required.", "error")
-        return redirect(url_for("admin.new_collector", campaign_id=campaign_id))
+        return redirect(f"/reverse/jo5/admin/campaigns/{campaign_id}/collectors/new")
 
     photo = request.files.get("photo")
     photo_filename = None
@@ -339,7 +339,7 @@ def create_collector(campaign_id: int):
     if photo and photo.filename:
         if not allowed_file(photo.filename):
             flash("Photo must be PNG/JPG/JPEG/WEBP.", "error")
-            return redirect(url_for("admin.new_collector", campaign_id=campaign_id))
+            return redirect(f"/reverse/jo5/admin/campaigns/{campaign_id}/collectors/new")
 
         uploads_dir = os.path.join("app", "static", "uploads")
         os.makedirs(uploads_dir, exist_ok=True)
