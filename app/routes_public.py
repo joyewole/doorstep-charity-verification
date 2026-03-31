@@ -85,18 +85,6 @@ def verify_page():
             recent_alerts=recent_alerts
         )
 
-    exp = int(payload.get("exp", 0))
-    now_ts = int(datetime.now(timezone.utc).timestamp())
-
-    if exp and now_ts > exp:
-        log_scan("EXPIRED", token=token)
-        return render_template(
-            "verify_result.html",
-            status="EXPIRED",
-            details=None,
-            recent_alerts=recent_alerts
-        )
-
     issued = IssuedQR.query.filter_by(token_hash=token_hash(token)).first()
     if not issued:
         log_scan("NOT_ISSUED", token=token)
@@ -112,6 +100,18 @@ def verify_page():
         return render_template(
             "verify_result.html",
             status="REVOKED",
+            details=None,
+            recent_alerts=recent_alerts
+        )
+    
+    exp = int(payload.get("exp", 0))
+    now_ts = int(datetime.now(timezone.utc).timestamp())
+
+    if exp and now_ts > exp:
+        log_scan("EXPIRED", token=token)
+        return render_template(
+            "verify_result.html",
+            status="EXPIRED",
             details=None,
             recent_alerts=recent_alerts
         )
