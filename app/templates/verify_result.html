@@ -97,7 +97,7 @@
       <div class="collector-card">
         {% if details.collector_photo %}
           <div class="collector-photo">
-            <img src="/static/uploads/{{ details.collector_photo }}" alt="Collector Photo">
+            <img src="/reverse/jo5/static/uploads/{{ details.collector_photo }}" alt="Collector Photo">
           </div>
         {% endif %}
         <div class="collector-info">
@@ -165,12 +165,12 @@
 
     {% if status != "VERIFIED" %}
       <div style="margin-top:16px;">
-        <a class="btn" href="{{ url_for('alerts.report_suspicious') }}">Report Suspicious Activity</a>
+        <a class="btn" href="/reverse/jo5/report_suspicious">Report Suspicious Activity</a>
       </div>
     {% endif %}
 
     <div style="margin-top:16px;">
-      <a class="btn" href="{{ url_for('public.scan') }}">Scan another QR</a>
+      <a class="btn" href="/reverse/jo5/scan">Scan another QR</a>
     </div>
   </div>
 
@@ -194,7 +194,7 @@
         {% endfor %}
       </ul>
 
-      <a class="btn" href="{{ url_for('alerts.alerts_list') }}">View All Fraud Alerts</a>
+      <a class="btn" href="/reverse/jo5/alerts">View All Fraud Alerts</a>
     </div>
   {% endif %}
 
