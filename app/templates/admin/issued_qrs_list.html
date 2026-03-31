@@ -30,56 +30,41 @@
 
               {% if item.revoked_at %}
                 <span class="badge badge-danger">REVOKED</span>
-              {% elif item.expires_at < now %}
-                <span class="badge badge-warning">EXPIRED</span>
+              {% elif item.expires_at and item.expires_at < now %}
+                <span class="badge badge-warn">EXPIRED</span>
               {% else %}
                 <span class="badge badge-success">ACTIVE</span>
               {% endif %}
             </div>
 
             {% if item.revoked_at %}
-              <p class="muted" style="margin-top:8px;">
-                Revoked at: {{ item.revoked_at.strftime('%Y-%m-%d %H:%M') }}
-              </p>
+              <p class="muted" style="margin-top:8px;">
+                Revoked at: {{ item.revoked_at.strftime('%Y-%m-%d %H:%M') }}
+              </p>
 
-              <div style="margin-top:10px; display:flex; gap:10px;">
-                <a class="btn" href="/reverse/jo5/verify?token={{ item.token }}" target="_blank">
-                  Verify
-                </a>
+              <div style="margin-top:10px; display:flex; gap:10px;">
+                <a class="btn" href="/reverse/jo5/verify?token={{ item.token }}" target="_blank">
+                  Verify
+                </a>
 
-                <a class="btn outline" href="/reverse/jo5/admin/issued/{{ item.id }}/qr.png" target="_blank">
-                  View QR
-                </a>
-              </div>
+                <a class="btn outline" href="/reverse/jo5/admin/issued/{{ item.id }}/qr.png" target="_blank">
+                  View QR
+                </a>
+              </div>
             {% else %}
-              <div style="margin-top:10px; display:flex; gap:10px;">
-                <form method="POST" action="/reverse/jo5/admin/issued-qrs/{{ item.id }}/revoke">
-                  <button class="btn secondary" type="submit">Revoke</button>
-                </form>
+              <div style="margin-top:10px; display:flex; gap:10px;">
+                <form method="POST" action="/reverse/jo5/admin/issued-qrs/{{ item.id }}/revoke">
+                  <button class="btn secondary" type="submit">Revoke</button>
+                </form>
 
-                <a class="btn" href="/reverse/jo5/verify?token={{ item.token }}" target="_blank">
-                  Verify
-                </a>
+                <a class="btn" href="/reverse/jo5/verify?token={{ item.token }}" target="_blank">
+                  Verify
+                </a>
 
-                <a class="btn outline" href="/reverse/jo5/admin/issued/{{ item.id }}/qr.png" target="_blank">
-                  View QR
-                </a>
-              </div>
-            {% endif %}
-
-  <form method="POST" action="/reverse/jo5/admin/issued-qrs/{{ item.id }}/revoke">
-    <button class="btn secondary" type="submit">Revoke</button>
-  </form>
-
-  <a class="btn" href="/reverse/jo5/verify?token={{ item.token }}" target="_blank">
-    Verify
-  </a>
-
-  <a class="btn outline" href="/reverse/jo5/admin/issued/{{ item.id }}/qr.png" target="_blank">
-    View QR
-  </a>
-
-</div>
+                <a class="btn outline" href="/reverse/jo5/admin/issued/{{ item.id }}/qr.png" target="_blank">
+                  View QR
+                </a>
+              </div>
             {% endif %}
           </li>
         {% endfor %}
