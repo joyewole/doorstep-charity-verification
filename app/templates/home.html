@@ -11,7 +11,7 @@
     <div class="card">
       <h2>Stay Safe 🚨</h2>
       <p>Report suspicious activity or share feedback about genuine collectors.</p>
-      <a class="btn" href="/reverse/jo5/report_suspicious">Report a Collector</a>
+      <a class="btn" href="{{ url_for('alerts.report_suspicious') }}">Report a Collector</a>
     </div>
 
     <div class="card">
@@ -44,7 +44,7 @@
           {% endfor %}
         </ul>
 
-        <a class="btn" href="/reverse/jo5/alerts">View All Fraud Alerts</a>
+        <a class="btn" href="{{ url_for('alerts.alerts_list') }}">View All Fraud Alerts</a>
       {% else %}
         <p>No recent fraud alerts available.</p>
       {% endif %}
@@ -72,7 +72,7 @@
       {% endfor %}
     </ul>
 
-    <a class="btn outline" href="/reverse/jo5/community_warnings">View Community Warnings</a>
+    <a class="btn outline" href="{{ url_for('alerts.community_warnings') }}">View Community Warnings</a>
   {% else %}
     <p class="muted">No community warnings at this time.</p>
   {% endif %}
@@ -100,7 +100,7 @@
       {% endfor %}
     </ul>
 
-    <a class="btn outline" href="/reverse/jo5/community_feedback">View Trusted Feedback</a>
+    <a class="btn outline" href="{{ url_for('alerts.community_feedback') }}">View Trusted Feedback</a>
   {% else %}
     <p class="muted">No trusted community feedback at this time.</p>
   {% endif %}
