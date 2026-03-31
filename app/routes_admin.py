@@ -239,7 +239,8 @@ def issued_qrs(campaign_id):
     return render_template(
         "admin/issued_qrs_list.html",
         campaign=campaign,
-        issued_list=issued_list
+        issued_list=issued_list,
+        now=datetime.utcnow()
     )
 
 
